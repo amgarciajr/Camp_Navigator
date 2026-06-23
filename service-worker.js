@@ -1,4 +1,4 @@
-const CACHE_NAME = 'campground-navigator-after-dark-v3';
+const CACHE_NAME = 'campground-navigator-after-dark-v4';
 const ASSETS = [
   './',
   './index.html',
