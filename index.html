@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#090011" />
+  <meta name="theme-color" content="#140019" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="After Dark" />
@@ -11,60 +11,98 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
-  <style>
+
+  <style id="after-dark-utility-style">
     :root {
-      --glass: rgba(25, 3, 36, 0.58);
-      --glass-strong: rgba(15, 2, 25, 0.76);
-      --panel: rgba(255, 255, 255, 0.055);
-      --shadow: 0 14px 38px rgba(0, 0, 0, 0.34);
-      --sheet-peek: 132px;
-      --sheet-mid: min(34svh, 318px);
-      --sheet-full: calc(100svh - 108px);
-    }
-
-    .app-shell {
-      background:
-        radial-gradient(circle at 12% 10%, rgba(255, 79, 216, 0.22), transparent 22rem),
-        radial-gradient(circle at 88% 16%, rgba(98, 247, 255, 0.14), transparent 20rem),
-        linear-gradient(160deg, #090011 0%, #170028 52%, #05000a 100%);
-    }
-
-    .topbar {
-      background: linear-gradient(180deg, rgba(12, 0, 18, 0.74), rgba(12, 0, 18, 0.30) 74%, transparent);
-      backdrop-filter: blur(12px);
+      --glass: rgba(18, 3, 29, 0.46);
+      --glass-strong: rgba(12, 2, 22, 0.68);
+      --panel: rgba(255, 255, 255, 0.052);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.30);
+      --sheet-peek: 112px;
+      --sheet-mid: min(32svh, 286px);
     }
 
     .map-viewport {
       background:
-        radial-gradient(circle at 50% 42%, rgba(255,79,216,0.15), transparent 28rem),
-        radial-gradient(circle at 72% 18%, rgba(98,247,255,0.12), transparent 20rem),
-        linear-gradient(180deg, rgba(18,0,29,0.42), rgba(4,0,10,0.94));
+        radial-gradient(circle at 24% 18%, rgba(255,79,216,0.18), transparent 20rem),
+        radial-gradient(circle at 78% 22%, rgba(98,247,255,0.14), transparent 18rem),
+        radial-gradient(circle at 42% 76%, rgba(184,107,255,0.16), transparent 22rem),
+        linear-gradient(180deg, rgba(20,0,32,0.72), rgba(4,0,10,0.96));
     }
 
-    .map-stage {
+    .reference-source { display: none; }
+    .night-map-glow,
+    .night-map-grid,
+    .schematic-map,
+    .marker-layer { position: absolute; inset: 0; }
+    .night-map-glow,
+    .night-map-grid { z-index: 0; }
+    .marker-layer { z-index: 4; }
+
+    .night-map-glow {
       background:
         radial-gradient(circle at 37% 52%, rgba(255,79,216,0.18), transparent 18rem),
         radial-gradient(circle at 70% 45%, rgba(98,247,255,0.12), transparent 16rem),
-        linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.005));
+        radial-gradient(circle at 30% 78%, rgba(184,107,255,0.14), transparent 17rem);
     }
 
-    .map-stage::before {
-      content: "";
-      position: absolute;
-      inset: 0;
+    .night-map-grid {
       opacity: 0.34;
       background-image:
         linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
       background-size: 42px 42px;
-      mask-image: radial-gradient(circle at center, black 0%, black 58%, transparent 85%);
+      mask-image: radial-gradient(circle at center, black 0%, black 64%, transparent 90%);
+    }
+
+    .schematic-map {
+      z-index: 1;
+      overflow: visible;
+      opacity: 0.92;
+      filter: drop-shadow(0 0 10px rgba(98,247,255,0.06));
       pointer-events: none;
     }
 
-    .map-image {
-      opacity: 0;
-      filter: none;
+    .map-zone {
+      fill: rgba(255,255,255,0.025);
+      stroke-width: 0.28;
+      stroke-dasharray: 2.4 2.4;
     }
+    .map-zone--north { stroke: rgba(98,247,255,0.34); fill: rgba(98,247,255,0.035); }
+    .map-zone--center { stroke: rgba(255,79,216,0.32); fill: rgba(255,79,216,0.035); }
+    .map-zone--grove { stroke: rgba(198,255,61,0.28); fill: rgba(198,255,61,0.030); }
+
+    .map-road,
+    .map-trail {
+      fill: none;
+      vector-effect: non-scaling-stroke;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .map-road {
+      stroke: rgba(255,247,255,0.30);
+      stroke-width: 1.2;
+      filter: url(#softGlow);
+    }
+    .map-road--main { stroke: rgba(98,247,255,0.44); stroke-width: 1.55; }
+    .map-road--loop { stroke: rgba(255,79,216,0.34); }
+    .map-road--center { stroke: rgba(255,247,255,0.26); }
+    .map-road--grove { stroke: rgba(198,255,61,0.30); }
+    .map-trail {
+      stroke: rgba(255,247,255,0.17);
+      stroke-width: 0.76;
+      stroke-dasharray: 2 2.8;
+    }
+    .map-node {
+      fill: rgba(255,247,255,0.45);
+      stroke: rgba(5,0,10,0.7);
+      stroke-width: 0.24;
+    }
+
+    .zone-label { z-index: 2; }
+    .zone-label--center { left: 36%; top: 50%; }
+    .zone-label--grove { left: 16%; top: 86%; }
+    .zone-label--cabins { left: 11%; top: 75%; }
 
     .map-card,
     .search-box,
@@ -75,81 +113,40 @@
       box-shadow: 0 10px 28px rgba(0,0,0,0.24);
       backdrop-filter: blur(14px);
     }
-
-    .map-card {
-      max-width: min(335px, calc(100% - 88px));
-      padding: 12px 14px;
-    }
-
-    .map-card p:last-child { font-size: 0.82rem; }
-
-    .reference-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 10px;
-      min-height: 32px;
-      padding: 0 12px;
-      border: 1px solid rgba(255,255,255,0.13);
-      border-radius: 999px;
-      background: rgba(255,255,255,0.075);
-      color: var(--accent-2);
-      font-size: 0.78rem;
-      font-weight: 950;
-      text-decoration: none;
-    }
-
+    .map-card { max-width: min(318px, calc(100% - 96px)); padding: 10px 12px; }
     .bottom-sheet {
-      border-color: rgba(255,255,255,0.105);
-      border-radius: 24px 24px 0 0;
+      border-radius: 22px 22px 0 0;
       background: var(--glass-strong);
-      box-shadow: 0 -14px 42px rgba(0,0,0,0.34);
+      box-shadow: 0 -10px 32px rgba(0,0,0,0.30);
       backdrop-filter: blur(18px);
     }
-
-    .sheet-drag-zone { height: 22px; }
-    .sheet-handle { width: 42px; height: 4px; }
-    .sheet-nav { padding-bottom: 8px; }
-    .sheet-tab { min-height: 34px; font-size: 0.78rem; }
-    .sheet-scroll { padding-inline: 12px; }
-
-    .destination-hero,
-    .field-card,
-    .tool-card,
-    .details-grid > div {
-      border-color: rgba(255,255,255,0.105);
-      border-radius: 18px;
-      background: rgba(255,255,255,0.055);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-
-    .destination-hero { padding: 12px 14px; }
-
     .bottom-sheet[data-state="peek"] .details-grid,
     .bottom-sheet[data-state="peek"] .action-grid,
     .bottom-sheet[data-state="peek"] .field-card,
     .bottom-sheet[data-state="peek"] .tool-card,
     .bottom-sheet[data-state="peek"] .list-stack,
-    .bottom-sheet[data-state="peek"] .recent-header {
-      display: none;
-    }
-
-    .marker {
-      box-shadow: 0 5px 16px rgba(0,0,0,0.24), 0 0 0 5px rgba(255,255,255,0.04);
-    }
-
-    .marker::after { background: rgba(18, 2, 28, 0.78); }
+    .bottom-sheet[data-state="peek"] .recent-header { display: none; }
+    body.is-boring .schematic-map { opacity: 0.52; filter: none; }
+    body.is-boring .map-zone { stroke: rgba(255,255,255,0.18); fill: rgba(255,255,255,0.025); }
+    body.is-boring .map-road { stroke: rgba(231,238,232,0.28); }
+    body.is-boring .map-trail { stroke: rgba(231,238,232,0.14); }
   </style>
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar" aria-labelledby="app-title">
-      <button id="resetMapButton" class="topbar-button" type="button" aria-label="Reset map"><span aria-hidden="true">⌂</span></button>
+      <button id="resetMapButton" class="topbar-button" type="button" aria-label="Reset map">
+        <span aria-hidden="true">⌂</span>
+      </button>
+
       <div class="topbar-title">
         <p>The Woods · After Dark</p>
         <h1 id="app-title">The Woods After Dark</h1>
       </div>
-      <button id="installButton" class="topbar-button install-button" type="button" hidden aria-label="Install app"><span aria-hidden="true">＋</span></button>
+
+      <button id="installButton" class="topbar-button install-button" type="button" hidden aria-label="Install app">
+        <span aria-hidden="true">＋</span>
+      </button>
     </header>
 
     <section class="map-screen" aria-labelledby="map-title">
@@ -157,24 +154,70 @@
         <div class="search-box">
           <span aria-hidden="true">⌕</span>
           <label class="sr-only" for="searchInput">Search campground destinations</label>
-          <input id="searchInput" type="search" autocomplete="off" placeholder="Who/what are we finding tonight?" />
+          <input id="searchInput" type="search" autocomplete="off" placeholder="Find a site, cabin, bathhouse, or excuse…" />
           <button id="clearSearchButton" type="button" aria-label="Clear search">×</button>
         </div>
         <div id="searchResults" class="search-results" hidden></div>
       </div>
 
       <div id="mapViewport" class="map-viewport">
-        <div id="mapStage" class="map-stage" aria-label="Clean schematic campsite pin field">
-          <img id="mapImage" class="map-image" src="assets/woods-map.png" alt="Hidden campground reference geometry" />
+        <div id="mapStage" class="map-stage" aria-label="After Dark utility map">
+          <div class="night-map-glow" aria-hidden="true"></div>
+          <div class="night-map-grid" aria-hidden="true"></div>
+          <svg class="schematic-map" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="0.85" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <path class="map-zone map-zone--north" d="M54,5 C68,5 83,14 88,27 C94,44 87,58 74,62 C61,66 45,61 39,49 C31,34 38,12 54,5 Z" />
+            <path class="map-zone map-zone--center" d="M29,35 C43,29 59,36 65,50 C70,61 64,73 49,76 C35,79 22,69 19,56 C16,47 20,39 29,35 Z" />
+            <path class="map-zone map-zone--grove" d="M8,67 C22,58 39,62 45,75 C50,86 39,96 23,96 C10,96 4,88 5,78 C5,73 6,70 8,67 Z" />
+            <path class="map-road map-road--main" d="M74,3 C73,12 70,20 68,29 C65,41 65,51 70,63 C75,74 83,84 93,97" />
+            <path class="map-road map-road--loop" d="M55,12 C70,13 82,23 82,37 C82,51 69,58 55,56 C42,54 34,45 35,34 C36,22 43,14 55,12 Z" />
+            <path class="map-road map-road--center" d="M23,46 C32,41 43,40 52,44 C62,49 67,58 64,68 C60,78 48,82 35,78 C23,75 17,65 18,55 C19,51 20,48 23,46 Z" />
+            <path class="map-road map-road--grove" d="M14,78 C22,68 35,68 40,78 C45,88 36,94 24,93 C15,92 10,86 14,78 Z" />
+            <path class="map-trail" d="M36,54 C29,59 25,67 24,77" />
+            <path class="map-trail" d="M63,60 C55,67 48,74 40,82" />
+            <path class="map-trail" d="M49,44 C44,38 40,31 36,22" />
+            <circle class="map-node" cx="39" cy="52" r="1.4" />
+            <circle class="map-node" cx="41" cy="55" r="1.1" />
+            <circle class="map-node" cx="27" cy="86" r="1.1" />
+            <circle class="map-node" cx="74" cy="32" r="1.1" />
+          </svg>
+          <div class="zone-label zone-label--north">North loop</div>
+          <div class="zone-label zone-label--center">Main drag</div>
+          <div class="zone-label zone-label--grove">Grove</div>
+          <div class="zone-label zone-label--cabins">Cabins</div>
+          <img id="mapImage" class="map-image reference-source" src="assets/woods-map.png" alt="Campground reference map of The Woods Camping Resort" />
           <div id="markerLayer" class="marker-layer"></div>
         </div>
       </div>
 
       <div class="map-card">
-        <p class="kicker">After Dark pin field</p>
-        <h2 id="map-title">Tap a pin, babe</h2>
-        <p>Clean schematic view. The paper map is tucked away where it belongs.</p>
-        <a class="reference-link" href="assets/woods-map.png" target="_blank" rel="noopener">Open resort map</a>
+        <p class="kicker">After Dark utility</p>
+        <h2 id="map-title">Find the move</h2>
+        <p>A campsite map with better lighting. Use it however the evening unfolds.</p>
+        <button id="referenceToggleButton" type="button" class="reference-link">Paper map</button>
+      </div>
+
+      <div id="referenceOverlay" class="reference-overlay" hidden>
+        <div class="reference-panel" role="dialog" aria-modal="true" aria-labelledby="referenceTitle">
+          <div class="reference-header">
+            <div>
+              <p class="kicker">Reference only</p>
+              <h2 id="referenceTitle">Resort map</h2>
+            </div>
+            <button id="referenceCloseButton" type="button" class="topbar-button" aria-label="Close resort map">×</button>
+          </div>
+          <div class="reference-scroll">
+            <img src="assets/woods-map.png" alt="Printed campground map reference" />
+          </div>
+        </div>
       </div>
 
       <div class="floating-actions" aria-label="Map quick actions">
@@ -182,61 +225,196 @@
         <button id="zoomOutButton" type="button" class="fab" aria-label="Zoom out">−</button>
         <button id="site125Button" type="button" class="fab site-fab" aria-label="Go to Site 125">125</button>
       </div>
+
       <div id="connectionBadge" class="connection-badge">Offline ready</div>
     </section>
 
     <section id="bottomSheet" class="bottom-sheet" data-state="peek" aria-labelledby="details-title">
-      <div id="sheetDragHandle" class="sheet-drag-zone" role="button" tabindex="0" aria-label="Drag destination panel"><span class="sheet-handle" aria-hidden="true"></span></div>
+      <div id="sheetDragHandle" class="sheet-drag-zone" role="button" tabindex="0" aria-label="Drag destination panel">
+        <span class="sheet-handle" aria-hidden="true"></span>
+      </div>
+
       <nav class="sheet-nav" aria-label="Sheet views">
-        <button type="button" class="sheet-tab is-active" data-view="destination">The Move</button>
-        <button type="button" class="sheet-tab" data-view="find">Hunt</button>
-        <button type="button" class="sheet-tab" data-view="saved">Little Black Book</button>
+        <button type="button" class="sheet-tab is-active" data-view="destination">Map</button>
+        <button type="button" class="sheet-tab" data-view="find">Find</button>
+        <button type="button" class="sheet-tab" data-view="saved">Saved</button>
         <button type="button" class="sheet-tab" data-view="settings">Discretion</button>
       </nav>
+
       <div class="sheet-scroll">
         <section class="sheet-view is-active" data-view-panel="destination">
           <div class="destination-hero">
-            <div><p id="detailSubtitle" class="kicker">After Dark mode</p><h2 id="details-title">What’s the move?</h2></div>
-            <div class="hero-actions"><button id="favoriteButton" type="button" class="icon-chip" aria-label="Add to favorites" disabled>☆</button><span id="detailBadge" class="detail-badge">Cruise control</span></div>
+            <div>
+              <p id="detailSubtitle" class="kicker">After Dark utility</p>
+              <h2 id="details-title">Ready when you are</h2>
+            </div>
+            <div class="hero-actions">
+              <button id="favoriteButton" type="button" class="icon-chip" aria-label="Add to favorites" disabled>☆</button>
+              <span id="detailBadge" class="detail-badge">Pin mode</span>
+            </div>
           </div>
+
           <dl class="details-grid">
-            <div><dt>Name</dt><dd id="detailName">No pin selected</dd></div>
-            <div><dt>Type</dt><dd id="detailType">—</dd></div>
-            <div><dt>Coordinates</dt><dd id="detailCoords">—</dd></div>
-            <div><dt>Notes</dt><dd id="detailNotes">Tap a marker, search a site, save the pin, then take the scenic route.</dd></div>
+            <div>
+              <dt>Name</dt>
+              <dd id="detailName">No pin selected</dd>
+            </div>
+            <div>
+              <dt>Type</dt>
+              <dd id="detailType">—</dd>
+            </div>
+            <div>
+              <dt>Coordinates</dt>
+              <dd id="detailCoords">—</dd>
+            </div>
+            <div>
+              <dt>Notes</dt>
+              <dd id="detailNotes">Tap a marker or search a site. After that, it’s just navigation.</dd>
+            </div>
           </dl>
-          <div class="primary-actions"><button id="navigateButton" type="button" disabled>Take me there</button><button id="focusButton" type="button" class="secondary-button" disabled>Spotlight</button></div>
+
+          <div class="primary-actions">
+            <button id="navigateButton" type="button" disabled>Route me</button>
+            <button id="focusButton" type="button" class="secondary-button" disabled>Center pin</button>
+          </div>
+
           <div class="action-grid">
-            <button id="shareButton" type="button" class="utility-button" disabled>Share the pin</button>
-            <button id="copyButton" type="button" class="utility-button" disabled>Copy the receipts</button>
+            <button id="shareButton" type="button" class="utility-button" disabled>Share pin</button>
+            <button id="copyButton" type="button" class="utility-button" disabled>Copy pin</button>
             <button id="appleMapsButton" type="button" class="utility-button" disabled>Apple Maps</button>
             <button id="googleMapsButton" type="button" class="utility-button" disabled>Google Maps</button>
           </div>
         </section>
 
         <section class="sheet-view" data-view-panel="find">
-          <div class="field-card"><label for="siteInput">Find a site, cabin, or code</label><div class="input-row"><input id="siteInput" name="site" inputmode="text" pattern="[A-Za-z0-9]*" placeholder="125, G12, F26" /><button id="findSiteButton" type="button">Hunt</button></div><p class="hint">Estimated pins get you close. Be cute, be consensual, and verify the vibe when you arrive.</p></div>
-          <div class="field-card"><label for="destinationSelect">Scene directory</label><select id="destinationSelect"><option value="">Choose your next move</option></select></div>
-          <div class="field-card"><div class="section-row"><div><h3>Who’s on the board</h3><p>Turn layers on or off depending on tonight’s mission.</p></div><button id="showAllButton" type="button" class="text-button">Show the whole mess</button></div><div id="filterChips" class="filter-chips"></div></div>
+          <div class="field-card">
+            <label for="siteInput">Find a site, cabin, or code</label>
+            <div class="input-row">
+              <input id="siteInput" name="site" inputmode="text" pattern="[A-Za-z0-9]*" placeholder="125, G12, F26" />
+              <button id="findSiteButton" type="button">Find</button>
+            </div>
+            <p class="hint">Estimated pins get you close. Confidence gets you closer. The rest is between you and the woods.</p>
+          </div>
+
+          <div class="field-card">
+            <label for="destinationSelect">Destination directory</label>
+            <select id="destinationSelect">
+              <option value="">Choose a destination</option>
+            </select>
+          </div>
+
+          <div class="field-card">
+            <div class="section-row">
+              <div>
+                <h3>Layers</h3>
+                <p>Show only what you need: sites, amenities, roads, parking, or the whole campground.</p>
+              </div>
+              <button id="showAllButton" type="button" class="text-button">Show all</button>
+            </div>
+            <div id="filterChips" class="filter-chips"></div>
+          </div>
         </section>
 
         <section class="sheet-view" data-view-panel="saved">
-          <div class="section-row"><div><h3>Favorite spots</h3><p>Your little black book, saved only on this device.</p></div><button id="clearFavoritesButton" type="button" class="text-button">Clear</button></div>
-          <div id="favoritesList" class="list-stack empty-list">No favorites yet. Tragic, but fixable.</div>
-          <div class="section-row recent-header"><div><h3>Recent moves</h3><p>Recently scoped pins.</p></div><button id="clearRecentButton" type="button" class="text-button">Clear</button></div>
-          <div id="recentList" class="list-stack empty-list">No recent moves yet.</div>
+          <div class="section-row">
+            <div>
+              <h3>Saved spots</h3>
+              <p>Saved only on this device. No accounts, no feed, no drama.</p>
+            </div>
+            <button id="clearFavoritesButton" type="button" class="text-button">Clear</button>
+          </div>
+          <div id="favoritesList" class="list-stack empty-list">No saved spots yet.</div>
+
+          <div class="section-row recent-header">
+            <div>
+              <h3>Recent moves</h3>
+              <p>Recently viewed pins.</p>
+            </div>
+            <button id="clearRecentButton" type="button" class="text-button">Clear</button>
+          </div>
+          <div id="recentList" class="list-stack empty-list">No recent pins yet.</div>
         </section>
 
         <section class="sheet-view" data-view-panel="settings">
-          <div class="tool-card"><div><h3>Boring / discreet mode</h3><p>Neutral colors, cleaner copy, and spicy/social labels hidden. For when someone is looking over your shoulder.</p></div><label class="switch"><input id="guestModeToggle" type="checkbox" /><span></span></label></div>
-          <div class="tool-card after-dark-rules"><div><h3>After Dark rules</h3><p>Consent first. Respect quiet sites. Don’t out anyone. Don’t be weird. Leave no trace, emotional or otherwise.</p></div><span class="mini-badge">Keep it cute</span></div>
-          <div class="tool-card"><div><h3>Offline-ready shell</h3><p>The service worker caches the app shell, map image, and local data for faster loading.</p></div><span id="offlineStatus" class="mini-badge">Checking…</span></div>
-          <div class="tool-card"><div><h3>Home base</h3><p>Site 125 stays pinned for the fast retreat.</p></div><button id="homeBaseButton" type="button" class="utility-button">Run home to 125</button></div>
+          <div class="tool-card">
+            <div>
+              <h3>Boring / discreet mode</h3>
+              <p>Neutral colors, cleaner copy, and sensitive labels hidden. For when someone is looking over your shoulder.</p>
+            </div>
+            <label class="switch">
+              <input id="guestModeToggle" type="checkbox" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="tool-card after-dark-rules">
+            <div>
+              <h3>Map rules</h3>
+              <p>Respect quiet sites. Don’t out anyone. Don’t be weird. Leave no trace, emotional or otherwise.</p>
+            </div>
+            <span class="mini-badge">Keep it cute</span>
+          </div>
+
+          <div class="tool-card">
+            <div>
+              <h3>Offline-ready shell</h3>
+              <p>The service worker caches the app shell, map image, and local data for faster loading.</p>
+            </div>
+            <span id="offlineStatus" class="mini-badge">Checking…</span>
+          </div>
+
+          <div class="tool-card">
+            <div>
+              <h3>Home base</h3>
+              <p>Site 125 stays pinned for the fast retreat.</p>
+            </div>
+            <button id="homeBaseButton" type="button" class="utility-button">Back to 125</button>
+          </div>
         </section>
       </div>
-      <footer class="sheet-footer"><p id="statusMessage" class="status" role="status" aria-live="polite"></p></footer>
+
+      <footer class="sheet-footer">
+        <p id="statusMessage" class="status" role="status" aria-live="polite"></p>
+      </footer>
     </section>
   </main>
+
   <script type="module" src="app.js"></script>
+  <script type="module">
+    const afterDarkCopy = () => !document.body.classList.contains('is-boring');
+    const text = (selector, dark, boring = dark) => {
+      const el = document.querySelector(selector);
+      if (el) el.textContent = afterDarkCopy() ? dark : boring;
+    };
+    const value = (selector, dark, boring = dark) => {
+      const el = document.querySelector(selector);
+      if (el) el.placeholder = afterDarkCopy() ? dark : boring;
+    };
+    const patchUtilityCopy = () => {
+      text('#map-title', 'Find the move', 'Tap a marker');
+      text('.map-card .kicker', 'After Dark utility', 'Destination map');
+      const copy = document.querySelector('.map-card p:last-child');
+      if (copy) copy.textContent = afterDarkCopy()
+        ? 'A campsite map with better lighting. Use it however the evening unfolds.'
+        : 'Clean destination view. Open the resort map only when needed.';
+      value('#searchInput', 'Find a site, cabin, bathhouse, or excuse…', 'Search map, sites, POIs, bathhouses…');
+      text('[data-view="destination"]', 'Map');
+      text('[data-view="find"]', 'Find');
+      text('[data-view="saved"]', 'Saved');
+      text('[data-view="settings"]', 'Discreet');
+      text('#details-title', 'Ready when you are', 'Ready when you are');
+      text('#detailSubtitle', 'After Dark utility', 'Select a destination');
+      text('#detailBadge', 'Pin mode', 'Waiting');
+      text('#navigateButton', 'Route me', 'Navigate');
+      text('#focusButton', 'Center pin', 'Center');
+      text('#copyButton', 'Copy pin', 'Copy coordinates');
+      text('#shareButton', 'Share pin', 'Share');
+      text('#findSiteButton', 'Find', 'Find');
+      text('#showAllButton', 'Show all', 'Show all');
+      text('#homeBaseButton', 'Back to 125', 'Go to Site 125');
+    };
+    patchUtilityCopy();
+    document.querySelector('#guestModeToggle')?.addEventListener('change', () => setTimeout(patchUtilityCopy, 0));
+  </script>
 </body>
 </html>
