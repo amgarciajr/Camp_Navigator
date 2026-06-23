@@ -1,4 +1,4 @@
-const CACHE_NAME = 'campground-navigator-after-dark-v6';
+const CACHE_NAME = 'camp-nav-find-v1';
 const ASSETS = [
   './',
   './index.html',
@@ -26,10 +26,8 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-
   const requestUrl = new URL(event.request.url);
   const wantsHtml = event.request.mode === 'navigate' || requestUrl.pathname.endsWith('/index.html');
-
   if (wantsHtml) {
     event.respondWith(
       fetch(event.request)
@@ -42,7 +40,6 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
