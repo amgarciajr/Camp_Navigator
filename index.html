@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#06110c" />
+  <meta name="theme-color" content="#140019" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Camp Nav" />
-  <title>Campground Navigator</title>
+  <meta name="apple-mobile-web-app-title" content="After Dark" />
+  <title>The Woods After Dark</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
@@ -20,8 +20,8 @@
       </button>
 
       <div class="topbar-title">
-        <p>The Woods Camping Resort</p>
-        <h1 id="app-title">Campground Navigator</h1>
+        <p>The Woods · After Dark</p>
+        <h1 id="app-title">The Woods After Dark</h1>
       </div>
 
       <button id="installButton" class="topbar-button install-button" type="button" hidden aria-label="Install app">
@@ -34,7 +34,7 @@
         <div class="search-box">
           <span aria-hidden="true">⌕</span>
           <label class="sr-only" for="searchInput">Search campground destinations</label>
-          <input id="searchInput" type="search" autocomplete="off" placeholder="Search map, POIs, bathhouses…" />
+          <input id="searchInput" type="search" autocomplete="off" placeholder="Who/what are we finding tonight?" />
           <button id="clearSearchButton" type="button" aria-label="Clear search">×</button>
         </div>
         <div id="searchResults" class="search-results" hidden></div>
@@ -48,9 +48,9 @@
       </div>
 
       <div class="map-card">
-        <p class="kicker">Interactive map</p>
-        <h2 id="map-title">Tap a marker</h2>
-        <p>Pinch, pan, search, favorite, share, or navigate.</p>
+        <p class="kicker">After Dark map</p>
+        <h2 id="map-title">Tap a pin, babe</h2>
+        <p>Search, save, share, or take the scenic route.</p>
       </div>
 
       <div class="floating-actions" aria-label="Map quick actions">
@@ -68,29 +68,29 @@
       </div>
 
       <nav class="sheet-nav" aria-label="Sheet views">
-        <button type="button" class="sheet-tab is-active" data-view="destination">Destination</button>
-        <button type="button" class="sheet-tab" data-view="find">Find</button>
-        <button type="button" class="sheet-tab" data-view="saved">Saved</button>
-        <button type="button" class="sheet-tab" data-view="settings">Tools</button>
+        <button type="button" class="sheet-tab is-active" data-view="destination">The Move</button>
+        <button type="button" class="sheet-tab" data-view="find">Hunt</button>
+        <button type="button" class="sheet-tab" data-view="saved">Little Black Book</button>
+        <button type="button" class="sheet-tab" data-view="settings">Discretion</button>
       </nav>
 
       <div class="sheet-scroll">
         <section class="sheet-view is-active" data-view-panel="destination">
           <div class="destination-hero">
             <div>
-              <p id="detailSubtitle" class="kicker">Select a destination</p>
-              <h2 id="details-title">Ready when you are</h2>
+              <p id="detailSubtitle" class="kicker">After Dark mode</p>
+              <h2 id="details-title">What’s the move?</h2>
             </div>
             <div class="hero-actions">
               <button id="favoriteButton" type="button" class="icon-chip" aria-label="Add to favorites" disabled>☆</button>
-              <span id="detailBadge" class="detail-badge">Waiting</span>
+              <span id="detailBadge" class="detail-badge">Cruise control</span>
             </div>
           </div>
 
           <dl class="details-grid">
             <div>
               <dt>Name</dt>
-              <dd id="detailName">None selected</dd>
+              <dd id="detailName">No pin selected</dd>
             </div>
             <div>
               <dt>Type</dt>
@@ -102,18 +102,18 @@
             </div>
             <div>
               <dt>Notes</dt>
-              <dd id="detailNotes">Tap a marker or search to center the map and open native navigation.</dd>
+              <dd id="detailNotes">Tap a marker, search a site, save the pin, then take the scenic route.</dd>
             </div>
           </dl>
 
           <div class="primary-actions">
-            <button id="navigateButton" type="button" disabled>Navigate</button>
-            <button id="focusButton" type="button" class="secondary-button" disabled>Center</button>
+            <button id="navigateButton" type="button" disabled>Take me there</button>
+            <button id="focusButton" type="button" class="secondary-button" disabled>Spotlight</button>
           </div>
 
           <div class="action-grid">
-            <button id="shareButton" type="button" class="utility-button" disabled>Share</button>
-            <button id="copyButton" type="button" class="utility-button" disabled>Copy coordinates</button>
+            <button id="shareButton" type="button" class="utility-button" disabled>Share the pin</button>
+            <button id="copyButton" type="button" class="utility-button" disabled>Copy the receipts</button>
             <button id="appleMapsButton" type="button" class="utility-button" disabled>Apple Maps</button>
             <button id="googleMapsButton" type="button" class="utility-button" disabled>Google Maps</button>
           </div>
@@ -121,28 +121,28 @@
 
         <section class="sheet-view" data-view-panel="find">
           <div class="field-card">
-            <label for="siteInput">Jump to campsite or code</label>
+            <label for="siteInput">Find a site, cabin, or code</label>
             <div class="input-row">
               <input id="siteInput" name="site" inputmode="text" pattern="[A-Za-z0-9]*" placeholder="125, G12, F26" />
-              <button id="findSiteButton" type="button">Find</button>
+              <button id="findSiteButton" type="button">Hunt</button>
             </div>
-            <p class="hint">The imported KML currently includes Site 125 as the only campsite coordinate.</p>
+            <p class="hint">Estimated pins get you close. Be cute, be consensual, and verify the vibe when you arrive.</p>
           </div>
 
           <div class="field-card">
-            <label for="destinationSelect">Directory</label>
+            <label for="destinationSelect">Scene directory</label>
             <select id="destinationSelect">
-              <option value="">Choose a destination</option>
+              <option value="">Choose your next move</option>
             </select>
           </div>
 
           <div class="field-card">
             <div class="section-row">
               <div>
-                <h3>Map layers</h3>
-                <p>Choose what markers appear on the map.</p>
+                <h3>Who’s on the board</h3>
+                <p>Turn layers on or off depending on tonight’s mission.</p>
               </div>
-              <button id="showAllButton" type="button" class="text-button">Show all</button>
+              <button id="showAllButton" type="button" class="text-button">Show the whole mess</button>
             </div>
             <div id="filterChips" class="filter-chips"></div>
           </div>
@@ -151,28 +151,28 @@
         <section class="sheet-view" data-view-panel="saved">
           <div class="section-row">
             <div>
-              <h3>Favorites</h3>
-              <p>Saved on this device.</p>
+              <h3>Favorite spots</h3>
+              <p>Your little black book, saved only on this device.</p>
             </div>
             <button id="clearFavoritesButton" type="button" class="text-button">Clear</button>
           </div>
-          <div id="favoritesList" class="list-stack empty-list">No favorites yet.</div>
+          <div id="favoritesList" class="list-stack empty-list">No favorites yet. Tragic, but fixable.</div>
 
           <div class="section-row recent-header">
             <div>
-              <h3>Recent</h3>
-              <p>Your last viewed destinations.</p>
+              <h3>Recent moves</h3>
+              <p>Recently scoped pins.</p>
             </div>
             <button id="clearRecentButton" type="button" class="text-button">Clear</button>
           </div>
-          <div id="recentList" class="list-stack empty-list">No recent destinations yet.</div>
+          <div id="recentList" class="list-stack empty-list">No recent moves yet.</div>
         </section>
 
         <section class="sheet-view" data-view-panel="settings">
           <div class="tool-card">
             <div>
-              <h3>Guest-safe labels</h3>
-              <p>Hide private/social destination labels from search, directory, and markers.</p>
+              <h3>Boring / discreet mode</h3>
+              <p>Neutral colors, cleaner copy, and spicy/social labels hidden. For when someone is looking over your shoulder.</p>
             </div>
             <label class="switch">
               <input id="guestModeToggle" type="checkbox" />
@@ -180,9 +180,17 @@
             </label>
           </div>
 
+          <div class="tool-card after-dark-rules">
+            <div>
+              <h3>After Dark rules</h3>
+              <p>Consent first. Respect quiet sites. Don’t out anyone. Don’t be weird. Leave no trace, emotional or otherwise.</p>
+            </div>
+            <span class="mini-badge">Keep it cute</span>
+          </div>
+
           <div class="tool-card">
             <div>
-              <h3>Offline app shell</h3>
+              <h3>Offline-ready shell</h3>
               <p>The service worker caches the app shell, map image, and local data for faster loading.</p>
             </div>
             <span id="offlineStatus" class="mini-badge">Checking…</span>
@@ -191,9 +199,9 @@
           <div class="tool-card">
             <div>
               <h3>Home base</h3>
-              <p>Site 125 is pinned as the cabin quick action.</p>
+              <p>Site 125 stays pinned for the fast retreat.</p>
             </div>
-            <button id="homeBaseButton" type="button" class="utility-button">Open Site 125</button>
+            <button id="homeBaseButton" type="button" class="utility-button">Run home to 125</button>
           </div>
         </section>
       </div>

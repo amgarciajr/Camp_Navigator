@@ -110,3 +110,21 @@ Imported `corrected-campsites.json` from the Google satellite calibration workfl
 - Merge report: `MERGE_REPORT.md`
 
 The app still uses the Woods resort map as the guest-facing visual layer and uses corrected campsite latitude/longitude values for navigation.
+
+
+## After Dark primary release
+
+This build makes **After Dark** the default product personality and keeps the neutral/boring version as an opt-in **Boring / discreet mode** in the Discretion tab.
+
+### Included
+
+- Neon late-night color system: fuchsia, violet, cyan, midnight plum
+- Sassy but usable app copy
+- "The Move", "Hunt", "Little Black Book", and "Discretion" tabs
+- Boring/discreet mode that switches back to neutral colors and hides spicy/social labels
+- After Dark rules card: consent, privacy, quiet sites, and no outing
+- Uses the corrected campsite export already merged into `data.js`
+
+### Privacy stance
+
+This build does not scrape or infer private hookup behavior from social media. It uses the campsite/POI data already provided and keeps any after-dark language place-based, playful, and privacy-first.

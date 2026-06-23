@@ -1,11 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="g" x1="96" x2="420" y1="70" y2="440" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#9ee493"/>
-      <stop offset="1" stop-color="#1f7a45"/>
+    <radialGradient id="bg" cx="25%" cy="10%" r="90%">
+      <stop offset="0" stop-color="#46205d"/>
+      <stop offset="0.52" stop-color="#140019"/>
+      <stop offset="1" stop-color="#05000a"/>
+    </radialGradient>
+    <linearGradient id="neon" x1="90" x2="430" y1="90" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff4fd8"/>
+      <stop offset="0.55" stop-color="#b86bff"/>
+      <stop offset="1" stop-color="#62f7ff"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#06110c"/>
-  <path d="M100 350 244 86a14 14 0 0 1 24 0l144 264c8 14-6 31-21 25l-92-36-31 80c-5 14-25 14-30 0l-31-80-92 36c-15 6-29-11-15-25Z" fill="url(#g)"/>
-  <circle cx="256" cy="254" r="44" fill="#f7fff8"/>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M338 88c-66 19-114 80-114 152 0 83 64 151 146 158-27 18-59 28-94 28-94 0-170-76-170-170 0-80 55-147 129-165 35-8 70-4 103-3Z" fill="url(#neon)"/>
+  <path d="M151 359 253 158a12 12 0 0 1 22 0l102 201c6 13-7 27-20 21l-62-27-20 51c-4 12-21 12-25 0l-20-51-62 27c-13 6-26-8-17-21Z" fill="#fff7ff" opacity=".94"/>
+  <circle cx="352" cy="156" r="18" fill="#62f7ff"/>
 </svg>

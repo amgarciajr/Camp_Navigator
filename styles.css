@@ -1,17 +1,17 @@
 :root {
   color-scheme: dark;
-  --bg: #06110c;
-  --ink: #f7fff8;
-  --muted: rgba(247, 255, 248, 0.68);
-  --faint: rgba(247, 255, 248, 0.46);
-  --line: rgba(255, 255, 255, 0.13);
-  --glass: rgba(8, 20, 13, 0.72);
-  --glass-strong: rgba(9, 22, 15, 0.93);
-  --panel: rgba(255, 255, 255, 0.075);
-  --accent: #9ee493;
-  --accent-2: #d7ffd3;
-  --danger: #ffb4a2;
-  --shadow: 0 20px 70px rgba(0, 0, 0, 0.42);
+  --bg: #090011;
+  --ink: #fff7ff;
+  --muted: rgba(255, 238, 255, 0.72);
+  --faint: rgba(255, 218, 255, 0.50);
+  --line: rgba(255, 255, 255, 0.16);
+  --glass: rgba(28, 5, 38, 0.76);
+  --glass-strong: rgba(17, 3, 28, 0.94);
+  --panel: rgba(255, 255, 255, 0.09);
+  --accent: #ff4fd8;
+  --accent-2: #62f7ff;
+  --danger: #ff8aa8;
+  --shadow: 0 22px 76px rgba(0, 0, 0, 0.52);
   --sheet-peek: 172px;
   --sheet-mid: min(48svh, 430px);
   --sheet-full: calc(100svh - 96px);
@@ -65,8 +65,8 @@ button:active:not(:disabled) { transform: translateY(1px); }
   margin: 0 auto;
   overflow: hidden;
   background:
-    radial-gradient(circle at top left, rgba(158, 228, 147, 0.2), transparent 34rem),
-    linear-gradient(160deg, #06110c 0%, #10291a 50%, #050b08 100%);
+    radial-gradient(circle at top left, rgba(255, 79, 216, 0.24), transparent 34rem),
+    linear-gradient(160deg, #090011 0%, #21003b 48%, #05000a 100%);
   isolation: isolate;
 }
 
@@ -81,7 +81,7 @@ button:active:not(:disabled) { transform: translateY(1px); }
   align-items: center;
   gap: 12px;
   padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
-  background: linear-gradient(180deg, rgba(6, 17, 12, 0.96), rgba(6, 17, 12, 0.64) 72%, transparent);
+  background: linear-gradient(180deg, rgba(12, 0, 18, 0.96), rgba(12, 0, 18, 0.62) 72%, transparent);
   backdrop-filter: blur(18px);
 }
 
@@ -209,7 +209,7 @@ h3 {
   padding: 4px 8px;
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 999px;
-  background: rgba(7,17,12,0.9);
+  background: rgba(18, 2, 28, 0.93);
   color: var(--ink);
   font-size: 0.68rem;
   font-weight: 950;
@@ -224,17 +224,17 @@ h3 {
 .marker:focus-visible::after,
 .marker.is-selected::after { opacity: 1; }
 
-.marker--campsite { background: #30cf79; }
-.marker--bathhouse { background: #3d8bfd; }
-.marker--poi { background: #ff9f1c; }
-.marker--area { background: #b07cff; }
-.marker--road-path { background: #8e9aaf; }
-.marker--parking { background: #f08080; }
+.marker--campsite { background: #ff4fd8; }
+.marker--bathhouse { background: #62f7ff; }
+.marker--poi { background: #ffd166; }
+.marker--area { background: #b86bff; }
+.marker--road-path { background: #c77dff; }
+.marker--parking { background: #ff8aa8; }
 
 .marker.is-selected {
   --marker-size: 27px;
   z-index: 8;
-  box-shadow: 0 0 0 9px rgba(158,228,147,0.24), 0 10px 24px rgba(0,0,0,0.34);
+  box-shadow: 0 0 0 9px rgba(255,79,216,0.28), 0 10px 24px rgba(0,0,0,0.34);
 }
 
 .search-panel {
@@ -253,7 +253,7 @@ h3 {
   padding: 0 8px 0 16px;
   border: 1px solid rgba(255,255,255,0.16);
   border-radius: 999px;
-  background: rgba(7,17,12,0.78);
+  background: rgba(18, 2, 28, 0.78);
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
 }
@@ -293,7 +293,7 @@ h3 {
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 20px;
-  background: rgba(7,17,12,0.9);
+  background: rgba(18, 2, 28, 0.93);
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
 }
@@ -346,7 +346,7 @@ h3 {
   padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: rgba(7,17,12,0.73);
+  background: rgba(18, 2, 28, 0.74);
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
   transition: bottom 0.25s ease;
@@ -387,7 +387,7 @@ h3 {
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(7,17,12,0.7);
+  background: rgba(18, 2, 28, 0.72);
   color: var(--muted);
   font-size: 0.74rem;
   font-weight: 850;
@@ -448,8 +448,8 @@ h3 {
 }
 
 .sheet-tab.is-active {
-  border-color: rgba(158,228,147,0.38);
-  background: rgba(158,228,147,0.16);
+  border-color: rgba(255,79,216,0.44);
+  background: rgba(255,79,216,0.17);
   color: var(--ink);
 }
 
@@ -497,7 +497,7 @@ h3 {
   min-height: 34px;
   border: 0;
   border-radius: 999px;
-  background: rgba(158,228,147,0.14);
+  background: rgba(255,79,216,0.16);
   color: var(--accent-2);
   font-size: 0.8rem;
   font-weight: 950;
@@ -567,7 +567,7 @@ dd {
 #findSiteButton {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #0b1d11;
-  box-shadow: 0 14px 30px rgba(158,228,147,0.18);
+  box-shadow: 0 14px 30px rgba(255,79,216,0.20);
 }
 
 .secondary-button,
@@ -617,8 +617,8 @@ select option { color: #07110c; }
 
 input:focus,
 select:focus {
-  border-color: rgba(158,228,147,0.78);
-  box-shadow: 0 0 0 4px rgba(158,228,147,0.16);
+  border-color: rgba(255,79,216,0.82);
+  box-shadow: 0 0 0 4px rgba(255,79,216,0.17);
 }
 
 .hint,
@@ -648,8 +648,8 @@ select:focus {
 }
 
 .filter-chip.is-active {
-  border-color: rgba(158,228,147,0.42);
-  background: rgba(158,228,147,0.17);
+  border-color: rgba(255,79,216,0.46);
+  background: rgba(255,79,216,0.18);
   color: var(--ink);
 }
 
@@ -767,3 +767,103 @@ select:focus {
 
   .map-card { display: none; }
 }
+
+
+/* After Dark is the primary personality. Boring mode is opt-in and discreet. */
+body:not(.is-boring) .app-shell::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 79, 216, 0.25), transparent 26rem),
+    radial-gradient(circle at 85% 12%, rgba(98, 247, 255, 0.18), transparent 22rem),
+    radial-gradient(circle at 70% 88%, rgba(184, 107, 255, 0.22), transparent 26rem);
+  filter: blur(4px);
+}
+
+body:not(.is-boring) .topbar-title h1,
+body:not(.is-boring) #details-title,
+body:not(.is-boring) #map-title {
+  text-shadow: 0 0 22px rgba(255, 79, 216, 0.22);
+}
+
+body:not(.is-boring) .topbar-button,
+body:not(.is-boring) .fab,
+body:not(.is-boring) .bottom-sheet,
+body:not(.is-boring) .search-box,
+body:not(.is-boring) .map-card,
+body:not(.is-boring) .destination-hero,
+body:not(.is-boring) .field-card,
+body:not(.is-boring) .tool-card {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 80px rgba(255, 79, 216, 0.09), var(--shadow);
+}
+
+body:not(.is-boring) #navigateButton,
+body:not(.is-boring) #findSiteButton,
+body:not(.is-boring) .install-button,
+body:not(.is-boring) .site-fab {
+  background: linear-gradient(135deg, #ff4fd8 0%, #b86bff 52%, #62f7ff 100%);
+  color: #150018;
+}
+
+body:not(.is-boring) .secondary-button,
+body:not(.is-boring) .utility-button,
+body:not(.is-boring) .sheet-tab,
+body:not(.is-boring) .filter-chip {
+  background: rgba(255, 255, 255, 0.095);
+}
+
+body:not(.is-boring) .sheet-tab.is-active,
+body:not(.is-boring) .filter-chip.is-active {
+  border-color: rgba(255, 79, 216, 0.48);
+  background: linear-gradient(135deg, rgba(255, 79, 216, 0.22), rgba(98, 247, 255, 0.12));
+}
+
+body:not(.is-boring) .marker.is-selected {
+  box-shadow: 0 0 0 9px rgba(255,79,216,0.30), 0 10px 26px rgba(0,0,0,0.42);
+}
+
+.after-dark-rules .mini-badge {
+  background: linear-gradient(135deg, rgba(255, 79, 216, 0.24), rgba(98, 247, 255, 0.14));
+}
+
+body.is-boring {
+  --bg: #07110c;
+  --ink: #f7fff8;
+  --muted: rgba(247, 255, 248, 0.68);
+  --faint: rgba(247, 255, 248, 0.46);
+  --line: rgba(255, 255, 255, 0.13);
+  --glass: rgba(8, 20, 13, 0.72);
+  --glass-strong: rgba(9, 22, 15, 0.94);
+  --panel: rgba(255, 255, 255, 0.075);
+  --accent: #9ee493;
+  --accent-2: #d7ffd3;
+  --danger: #ffb4a2;
+}
+
+body.is-boring .app-shell {
+  background:
+    radial-gradient(circle at top left, rgba(158, 228, 147, 0.18), transparent 34rem),
+    linear-gradient(160deg, #06110c 0%, #10291a 50%, #050b08 100%);
+}
+
+body.is-boring .topbar {
+  background: linear-gradient(180deg, rgba(6, 17, 12, 0.96), rgba(6, 17, 12, 0.64) 72%, transparent);
+}
+
+body.is-boring #navigateButton,
+body.is-boring #findSiteButton,
+body.is-boring .install-button,
+body.is-boring .site-fab {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0b1d11;
+}
+
+body.is-boring .marker--campsite { background: #30cf79; }
+body.is-boring .marker--bathhouse { background: #3d8bfd; }
+body.is-boring .marker--poi { background: #ff9f1c; }
+body.is-boring .marker--area { background: #b07cff; }
+body.is-boring .marker--road-path { background: #8e9aaf; }
+body.is-boring .marker--parking { background: #f08080; }

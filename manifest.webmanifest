@@ -1,12 +1,12 @@
 {
-  "name": "Campground Navigator",
-  "short_name": "Camp Nav",
+  "name": "The Woods After Dark",
+  "short_name": "After Dark",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
-  "background_color": "#06110c",
-  "theme_color": "#06110c",
-  "description": "Interactive campground navigation for The Woods Camping Resort.",
+  "background_color": "#090011",
+  "theme_color": "#140019",
+  "description": "A playful after-dark campground navigator for The Woods, with discreet mode built in.",
   "icons": [
     {
       "src": "assets/icon.svg",

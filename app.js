@@ -55,11 +55,11 @@ const STORAGE_KEYS = {
 };
 
 const categoryMeta = {
-  campsite: { label: 'Campsites', notes: 'Direct campsite destination from the imported KML.', short: 'Site' },
-  bathhouse: { label: 'Bathhouse', notes: 'Bathhouse / shower destination.', short: 'Bath' },
+  campsite: { label: 'Campsites', notes: 'Campsite destination. Estimated pins are for guest navigation, not surveyed pad boundaries.', short: 'Site' },
+  bathhouse: { label: 'Bathhouse', notes: 'Bathhouse / shower destination. Practical, social, and occasionally theatrical.', short: 'Bath' },
   poi: { label: 'Amenity / POI', notes: 'Mapped point of interest inside the resort.', short: 'POI' },
-  area: { label: 'Named area', notes: 'Area overlays use centroid coordinates for navigation.', short: 'Area' },
-  'road-path': { label: 'Road / path', notes: 'Road and path entries use midpoint coordinates.', short: 'Path' },
+  area: { label: 'Named area', notes: 'Named area; centroid coordinates get you close to the zone.', short: 'Area' },
+  'road-path': { label: 'Road / path', notes: 'Road or path midpoint. Keep it moving and keep it consensual.', short: 'Path' },
   parking: { label: 'Parking', notes: 'Parking area or lot.', short: 'Park' },
 };
 
@@ -222,6 +222,54 @@ function setStatus(message = '', type = 'info') {
   els.statusMessage.dataset.type = type;
 }
 
+function afterDarkCopy(afterDark, boring) {
+  return guestMode ? boring : afterDark;
+}
+
+function applyToneMode() {
+  document.body.classList.toggle('is-boring', guestMode);
+  document.title = guestMode ? 'Campground Navigator' : 'The Woods After Dark';
+
+  const appTitle = document.querySelector('#app-title');
+  const topEyebrow = document.querySelector('.topbar-title p');
+  const mapKicker = document.querySelector('.map-card .kicker');
+  const mapTitle = document.querySelector('#map-title');
+  const mapCopy = document.querySelector('.map-card p:last-child');
+  const searchInput = document.querySelector('#searchInput');
+
+  if (appTitle) appTitle.textContent = afterDarkCopy('The Woods After Dark', 'Campground Navigator');
+  if (topEyebrow) topEyebrow.textContent = afterDarkCopy('The Woods · After Dark', 'The Woods Camping Resort');
+  if (mapKicker) mapKicker.textContent = afterDarkCopy('After Dark map', 'Interactive map');
+  if (mapTitle) mapTitle.textContent = afterDarkCopy('Tap a pin, babe', 'Tap a marker');
+  if (mapCopy) mapCopy.textContent = afterDarkCopy('Search, save, share, or take the scenic route.', 'Search, save, share, or navigate.');
+  if (searchInput) searchInput.placeholder = afterDarkCopy('Who/what are we finding tonight?', 'Search map, sites, POIs, bathhouses…');
+}
+
+function getLocationNote(location) {
+  const base = categoryMeta[location.category]?.notes ?? 'Mapped destination.';
+  if (guestMode) return base;
+
+  if (location.category === 'campsite') {
+    return location.estimated
+      ? 'Estimated campsite pin. It’ll get you close; the rest is charm, consent, and a flashlight.'
+      : 'Known campsite pin. Home base energy — keep the exit strategy classy.';
+  }
+
+  if (/(cruis|sex|jock|martini|ft\.?\s*dix|sperm)/i.test(location.name)) {
+    return 'After-dark-coded spot. Read the room, respect boundaries, and keep everyone’s privacy intact.';
+  }
+
+  if (location.category === 'bathhouse') {
+    return 'Practical stop with social potential. Handle business, be respectful, and don’t make the staff write a memo.';
+  }
+
+  if (location.category === 'parking') {
+    return 'Park it, lock it, and remember: discretion is a feature, not a bug.';
+  }
+
+  return `${base} After Dark rule: consent first, sass second, screenshots never.`;
+}
+
 function setSheetState(state) {
   els.bottomSheet.dataset.state = state;
 }
@@ -318,21 +366,21 @@ function renderDetails(location) {
   const hasLocation = Boolean(location);
 
   if (!hasLocation) {
-    els.detailSubtitle.textContent = 'Select a destination';
-    els.detailsTitle.textContent = 'Ready when you are';
-    els.detailBadge.textContent = 'Waiting';
-    els.detailName.textContent = 'None selected';
+    els.detailSubtitle.textContent = afterDarkCopy('After Dark mode', 'Select a destination');
+    els.detailsTitle.textContent = afterDarkCopy('What’s the move?', 'Ready when you are');
+    els.detailBadge.textContent = afterDarkCopy('Cruise control', 'Waiting');
+    els.detailName.textContent = afterDarkCopy('No pin selected', 'None selected');
     els.detailType.textContent = '—';
     els.detailCoords.textContent = '—';
-    els.detailNotes.textContent = 'Tap a marker or search to center the map and open native navigation.';
+    els.detailNotes.textContent = afterDarkCopy('Tap a marker, search a site, save the pin, then take the scenic route.', 'Tap a marker or search to center the map and open native navigation.');
   } else {
-    els.detailSubtitle.textContent = 'Ready to navigate';
+    els.detailSubtitle.textContent = afterDarkCopy('Pin acquired', 'Ready to navigate');
     els.detailsTitle.textContent = location.displayName;
     els.detailBadge.textContent = categoryMeta[location.category]?.label ?? location.category;
     els.detailName.textContent = location.displayName;
     els.detailType.textContent = `${categoryMeta[location.category]?.label ?? location.category} · ${location.sourceGeometry ?? 'Mapped point'}`;
     els.detailCoords.textContent = `${Number(location.lat).toFixed(7)}, ${Number(location.lng).toFixed(7)}`;
-    els.detailNotes.textContent = categoryMeta[location.category]?.notes ?? 'Mapped destination.';
+    els.detailNotes.textContent = getLocationNote(location);
   }
 
   [
@@ -383,19 +431,19 @@ function selectLocation(id, options = {}) {
 
   if (options.center) centerOnLocation(location, options.zoom ?? 1.9);
   if (options.sheet) setSheetState(options.sheet);
-  if (options.source !== 'initial') setStatus(`Selected ${location.displayName}.`, 'info');
+  if (options.source !== 'initial') setStatus(afterDarkCopy(`Pinned ${location.displayName}. Go be interesting.`, `Selected ${location.displayName}.`), 'info');
 }
 
 function lookupSite() {
   const siteNumber = normalizeSiteNumber(els.siteInput.value);
   if (!siteNumber) {
-    setStatus('Enter a campsite number first.', 'error');
+    setStatus(afterDarkCopy('Give me a site/code first, detective.', 'Enter a campsite number first.'), 'error');
     return;
   }
 
   const location = getLocationBySiteNumber(siteNumber);
   if (!location || (guestMode && location.isPrivateLabel)) {
-    setStatus(`Site/code ${siteNumber} is not in the imported campsite dataset yet.`, 'error');
+    setStatus(afterDarkCopy(`Site/code ${siteNumber} is not on tonight’s list.`, `Site/code ${siteNumber} is not in the imported campsite dataset yet.`), 'error');
     return;
   }
 
@@ -672,7 +720,7 @@ async function copySelectedCoordinates() {
   if (!location) return;
   const text = `${location.displayName}: ${Number(location.lat).toFixed(7)}, ${Number(location.lng).toFixed(7)}`;
   await navigator.clipboard?.writeText(text);
-  setStatus('Coordinates copied.', 'info');
+  setStatus(afterDarkCopy('Coordinates copied. Receipts secured.', 'Coordinates copied.'), 'info');
 }
 
 async function shareSelectedLocation() {
@@ -686,10 +734,10 @@ async function shareSelectedLocation() {
       title: location.displayName,
       text: shareText,
     });
-    setStatus('Destination shared.', 'info');
+    setStatus(afterDarkCopy('Pin shared. Don’t be messy.', 'Destination shared.'), 'info');
   } else {
     await navigator.clipboard?.writeText(shareText);
-    setStatus('Share is not available here, so I copied the destination instead.', 'info');
+    setStatus(afterDarkCopy('Share was unavailable, so I copied the pin. Very analog, very brave.', 'Share is not available here, so I copied the destination instead.'), 'info');
   }
 }
 
@@ -700,6 +748,7 @@ function updateConnectionBadges() {
 }
 
 function refreshForGuestMode() {
+  applyToneMode();
   writeJson(STORAGE_KEYS.guestMode, guestMode);
   populateSelect();
   renderFilterChips();
@@ -710,7 +759,7 @@ function refreshForGuestMode() {
     if (guestMode && selected?.isPrivateLabel) {
       selectedId = null;
       renderDetails(null);
-      setStatus('Guest-safe labels are hidden.', 'info');
+      setStatus(afterDarkCopy('Boring mode is on. Spicy labels are tucked away.', 'Guest-safe labels are hidden.'), 'info');
     }
   }
 }
@@ -742,7 +791,7 @@ function attachEvents() {
     categoryOrder.forEach((category) => visibleCategories.add(category));
     renderFilterChips();
     renderMarkers();
-    setStatus('All map layers are visible.', 'info');
+    setStatus(afterDarkCopy('The whole messy board is visible.', 'All map layers are visible.'), 'info');
   });
 
   els.searchInput.addEventListener('input', () => renderSearchResults(els.searchInput.value));
@@ -761,20 +810,20 @@ function attachEvents() {
   els.resetMapButton.addEventListener('click', () => {
     panzoom?.reset();
     setSheetState('mid');
-    setStatus('Map reset.', 'info');
+    setStatus(afterDarkCopy('Map reset. Fresh start, allegedly.', 'Map reset.'), 'info');
   });
 
   els.focusButton.addEventListener('click', () => {
     const location = getSelectedLocation();
     if (!location) return;
     centerOnLocation(location);
-    setStatus(`Centered on ${location.displayName}.`, 'info');
+    setStatus(afterDarkCopy(`Spotlight on ${location.displayName}.`, `Centered on ${location.displayName}.`), 'info');
   });
 
   els.navigateButton.addEventListener('click', () => {
     const location = getSelectedLocation();
     if (!location) return;
-    setStatus(`Opening ${location.displayName} in your maps app…`, 'info');
+    setStatus(afterDarkCopy(`Taking you to ${location.displayName}… behave-ish.`, `Opening ${location.displayName} in your maps app…`), 'info');
     window.location.href = buildGeoUri(location);
   });
 
@@ -800,10 +849,10 @@ function attachEvents() {
     if (!selectedId) return;
     if (favorites.has(selectedId)) {
       favorites.delete(selectedId);
-      setStatus('Removed from favorites.', 'info');
+      setStatus(afterDarkCopy('Removed from the little black book.', 'Removed from favorites.'), 'info');
     } else {
       favorites.add(selectedId);
-      setStatus('Added to favorites.', 'info');
+      setStatus(afterDarkCopy('Saved to the little black book.', 'Added to favorites.'), 'info');
     }
     writeJson(STORAGE_KEYS.favorites, [...favorites]);
     updateFavoriteButton();
@@ -815,14 +864,14 @@ function attachEvents() {
     writeJson(STORAGE_KEYS.favorites, []);
     renderSavedLists();
     updateFavoriteButton();
-    setStatus('Favorites cleared.', 'info');
+    setStatus(afterDarkCopy('Little black book cleared. Plausible deniability restored.', 'Favorites cleared.'), 'info');
   });
 
   els.clearRecentButton.addEventListener('click', () => {
     recent = [];
     writeJson(STORAGE_KEYS.recent, recent);
     renderSavedLists();
-    setStatus('Recent destinations cleared.', 'info');
+    setStatus(afterDarkCopy('Recent moves cleared. Evidence? Gone.', 'Recent destinations cleared.'), 'info');
   });
 
   els.guestModeToggle.addEventListener('change', () => {
@@ -865,6 +914,7 @@ async function setupServiceWorker() {
 function init() {
   allLocations = createLocations();
   els.guestModeToggle.checked = guestMode;
+  applyToneMode();
 
   populateSelect();
   renderFilterChips();
@@ -884,7 +934,7 @@ function init() {
   if (els.mapImage.complete) ready();
   else els.mapImage.addEventListener('load', ready, { once: true });
 
-  setStatus(`Loaded ${DESTINATIONS.length} destinations and ${Object.keys(CAMPSITES).length} campsite record.`, 'info');
+  setStatus(afterDarkCopy(`Loaded ${DESTINATIONS.length} destinations and ${Object.keys(CAMPSITES).length} campsite pins. The night is young.`, `Loaded ${DESTINATIONS.length} destinations and ${Object.keys(CAMPSITES).length} campsite records.`), 'info');
 
   window.CampgroundNavigator = {
     anchor: MAP_ANCHOR,
