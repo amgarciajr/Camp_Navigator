@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#140019" />
+  <meta name="theme-color" content="#08050f" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="After Dark" />
@@ -12,66 +12,232 @@
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 
-  <style id="after-dark-utility-style">
+  <style id="mobile-first-shell">
     :root {
-      --glass: rgba(18, 3, 29, 0.46);
-      --glass-strong: rgba(12, 2, 22, 0.68);
-      --panel: rgba(255, 255, 255, 0.052);
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.30);
-      --sheet-peek: 112px;
-      --sheet-mid: min(32svh, 286px);
+      --mobile-bg: #07030d;
+      --mobile-glass: rgba(12, 6, 19, 0.62);
+      --mobile-glass-soft: rgba(18, 7, 29, 0.42);
+      --mobile-border: rgba(255, 255, 255, 0.12);
+      --mobile-text: #fff7ff;
+      --mobile-muted: rgba(255, 247, 255, 0.68);
+      --mobile-hot: #ff4fd8;
+      --mobile-cyan: #62f7ff;
+      --mobile-lime: #c6ff3d;
+      --drawer-width: min(86vw, 340px);
+      --sheet-peek: 106px;
+      --sheet-mid: 196px;
+      --sheet-full: min(72svh, 610px);
+      color-scheme: dark;
     }
 
-    .map-viewport {
+    html,
+    body,
+    .app-shell {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--mobile-bg);
+    }
+
+    body { margin: 0; }
+
+    .app-shell {
+      position: fixed;
+      inset: 0;
+      display: block;
       background:
-        radial-gradient(circle at 24% 18%, rgba(255,79,216,0.18), transparent 20rem),
-        radial-gradient(circle at 78% 22%, rgba(98,247,255,0.14), transparent 18rem),
-        radial-gradient(circle at 42% 76%, rgba(184,107,255,0.16), transparent 22rem),
-        linear-gradient(180deg, rgba(20,0,32,0.72), rgba(4,0,10,0.96));
+        radial-gradient(circle at 20% 8%, rgba(255, 79, 216, 0.26), transparent 20rem),
+        radial-gradient(circle at 90% 16%, rgba(98, 247, 255, 0.18), transparent 18rem),
+        linear-gradient(180deg, #090411 0%, #13001d 42%, #050208 100%);
     }
 
-    .reference-source { display: none; }
-    .night-map-glow,
-    .night-map-grid,
-    .schematic-map,
-    .marker-layer { position: absolute; inset: 0; }
-    .night-map-glow,
-    .night-map-grid { z-index: 0; }
-    .marker-layer { z-index: 4; }
-
-    .night-map-glow {
-      background:
-        radial-gradient(circle at 37% 52%, rgba(255,79,216,0.18), transparent 18rem),
-        radial-gradient(circle at 70% 45%, rgba(98,247,255,0.12), transparent 16rem),
-        radial-gradient(circle at 30% 78%, rgba(184,107,255,0.14), transparent 17rem);
+    .topbar {
+      display: none;
     }
 
-    .night-map-grid {
-      opacity: 0.34;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
-      background-size: 42px 42px;
-      mask-image: radial-gradient(circle at center, black 0%, black 64%, transparent 90%);
-    }
-
-    .schematic-map {
-      z-index: 1;
-      overflow: visible;
-      opacity: 0.92;
-      filter: drop-shadow(0 0 10px rgba(98,247,255,0.06));
+    .mobile-chrome {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      z-index: 80;
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 46px;
+      gap: 8px;
+      align-items: center;
       pointer-events: none;
     }
 
+    .chrome-button,
+    .mobile-search {
+      pointer-events: auto;
+      border: 1px solid var(--mobile-border);
+      background: rgba(9, 2, 14, 0.58);
+      color: var(--mobile-text);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.30);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .chrome-button {
+      width: 46px;
+      height: 46px;
+      border-radius: 17px;
+      font-size: 1.35rem;
+      font-weight: 900;
+      display: grid;
+      place-items: center;
+    }
+
+    .mobile-search {
+      min-width: 0;
+      height: 46px;
+      border-radius: 999px;
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) 34px;
+      align-items: center;
+      padding: 0 8px 0 14px;
+    }
+
+    .mobile-search span {
+      color: var(--mobile-cyan);
+      opacity: 0.9;
+      font-weight: 900;
+    }
+
+    .mobile-search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--mobile-text);
+      font: inherit;
+      font-size: 0.98rem;
+    }
+
+    .mobile-search input::placeholder { color: rgba(255,247,255,0.58); }
+    .mobile-search button {
+      border: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      color: var(--mobile-text);
+      font-size: 1.2rem;
+    }
+
+    .search-panel {
+      position: static;
+      display: contents;
+    }
+
+    .search-box { display: none; }
+
+    .search-results {
+      position: fixed;
+      z-index: 90;
+      top: calc(env(safe-area-inset-top, 0px) + 64px);
+      left: 66px;
+      right: 66px;
+      max-height: min(48svh, 360px);
+      overflow: auto;
+      border: 1px solid var(--mobile-border);
+      border-radius: 20px;
+      background: rgba(11, 4, 18, 0.92);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.42);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 8px;
+    }
+
+    .map-screen,
+    .map-viewport {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .map-stage {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      min-width: 100%;
+      min-height: 100%;
+      transform-origin: 0 0;
+      border-radius: 0;
+      background:
+        radial-gradient(circle at 42% 46%, rgba(255, 79, 216, 0.18), transparent 19rem),
+        radial-gradient(circle at 70% 32%, rgba(98, 247, 255, 0.13), transparent 17rem),
+        radial-gradient(circle at 34% 78%, rgba(198, 255, 61, 0.08), transparent 16rem),
+        linear-gradient(180deg, rgba(19, 0, 29, 0.76), rgba(4, 0, 9, 0.98));
+    }
+
+    .map-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.28;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: radial-gradient(circle at 50% 50%, black 0%, black 62%, transparent 90%);
+      pointer-events: none;
+    }
+
+    .map-stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(115deg, transparent 0 34%, rgba(98,247,255,0.10) 34.2%, transparent 35.4% 100%),
+        linear-gradient(22deg, transparent 0 48%, rgba(255,79,216,0.09) 48.2%, transparent 49.4% 100%);
+      pointer-events: none;
+    }
+
+    .map-image {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .schematic-map,
+    .marker-layer,
+    .zone-label {
+      position: absolute;
+    }
+
+    .schematic-map {
+      inset: 0;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.88;
+      filter: drop-shadow(0 0 16px rgba(98,247,255,0.10));
+    }
+
     .map-zone {
-      fill: rgba(255,255,255,0.025);
+      fill: rgba(255,255,255,0.022);
       stroke-width: 0.28;
-      stroke-dasharray: 2.4 2.4;
+      stroke-dasharray: 2.5 2.5;
     }
     .map-zone--north { stroke: rgba(98,247,255,0.34); fill: rgba(98,247,255,0.035); }
-    .map-zone--center { stroke: rgba(255,79,216,0.32); fill: rgba(255,79,216,0.035); }
-    .map-zone--grove { stroke: rgba(198,255,61,0.28); fill: rgba(198,255,61,0.030); }
-
+    .map-zone--center { stroke: rgba(255,79,216,0.34); fill: rgba(255,79,216,0.034); }
+    .map-zone--grove { stroke: rgba(198,255,61,0.30); fill: rgba(198,255,61,0.026); }
     .map-road,
     .map-trail {
       fill: none;
@@ -79,101 +245,371 @@
       stroke-linecap: round;
       stroke-linejoin: round;
     }
-    .map-road {
-      stroke: rgba(255,247,255,0.30);
-      stroke-width: 1.2;
-      filter: url(#softGlow);
-    }
-    .map-road--main { stroke: rgba(98,247,255,0.44); stroke-width: 1.55; }
+    .map-road { stroke: rgba(255,247,255,0.30); stroke-width: 1.05; }
+    .map-road--main { stroke: rgba(98,247,255,0.48); stroke-width: 1.4; }
     .map-road--loop { stroke: rgba(255,79,216,0.34); }
-    .map-road--center { stroke: rgba(255,247,255,0.26); }
-    .map-road--grove { stroke: rgba(198,255,61,0.30); }
-    .map-trail {
-      stroke: rgba(255,247,255,0.17);
-      stroke-width: 0.76;
-      stroke-dasharray: 2 2.8;
+    .map-road--grove { stroke: rgba(198,255,61,0.28); }
+    .map-trail { stroke: rgba(255,247,255,0.16); stroke-width: 0.68; stroke-dasharray: 1.7 2.7; }
+    .map-node { fill: rgba(255,247,255,0.45); }
+
+    .zone-label {
+      z-index: 3;
+      font-size: clamp(0.62rem, 2.8vw, 0.92rem);
+      line-height: 1;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,247,255,0.30);
+      font-weight: 900;
+      pointer-events: none;
+      text-shadow: 0 0 18px rgba(255,79,216,0.28);
     }
-    .map-node {
-      fill: rgba(255,247,255,0.45);
-      stroke: rgba(5,0,10,0.7);
-      stroke-width: 0.24;
+    .zone-label--north { left: 58%; top: 18%; }
+    .zone-label--center { left: 32%; top: 49%; }
+    .zone-label--grove { left: 11%; top: 71%; }
+    .zone-label--cabins { left: 9%; top: 62%; }
+
+    .marker-layer {
+      inset: 0;
+      z-index: 6;
     }
 
-    .zone-label { z-index: 2; }
-    .zone-label--center { left: 36%; top: 50%; }
-    .zone-label--grove { left: 16%; top: 86%; }
-    .zone-label--cabins { left: 11%; top: 75%; }
-
-    .map-card,
-    .search-box,
-    .connection-badge,
-    .topbar-button,
-    .fab {
-      background: rgba(18, 2, 28, 0.50);
-      box-shadow: 0 10px 28px rgba(0,0,0,0.24);
-      backdrop-filter: blur(14px);
+    .marker {
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 1px solid rgba(255,255,255,0.36);
+      box-shadow: 0 0 0 5px rgba(255,255,255,0.04), 0 0 26px rgba(255,79,216,0.30);
     }
-    .map-card { max-width: min(318px, calc(100% - 96px)); padding: 10px 12px; }
-    .bottom-sheet {
-      border-radius: 22px 22px 0 0;
-      background: var(--glass-strong);
-      box-shadow: 0 -10px 32px rgba(0,0,0,0.30);
+    .marker::after {
+      background: rgba(9,2,14,0.78);
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 900;
+    }
+    .marker.is-selected {
+      width: 30px;
+      height: 30px;
+      margin: -15px 0 0 -15px;
+      box-shadow: 0 0 0 7px rgba(255,79,216,0.16), 0 0 38px rgba(98,247,255,0.34);
+    }
+
+    .floating-actions {
+      right: 14px;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 126px);
+      gap: 8px;
+      z-index: 70;
+    }
+    #zoomInButton,
+    #zoomOutButton { display: none; }
+    .fab,
+    .site-fab {
+      width: 50px;
+      height: 50px;
+      border-radius: 18px;
+      border: 1px solid var(--mobile-border);
+      background: rgba(9,2,14,0.58);
+      color: var(--mobile-text);
       backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.28);
     }
+    .site-fab {
+      color: #100018;
+      background: linear-gradient(135deg, var(--mobile-hot), var(--mobile-cyan));
+    }
+
+    .connection-badge {
+      display: none;
+    }
+
+    .map-card { display: none; }
+
+    .bottom-sheet {
+      position: fixed;
+      z-index: 70;
+      left: 10px;
+      right: 10px;
+      bottom: env(safe-area-inset-bottom, 0px);
+      border: 1px solid var(--mobile-border);
+      border-radius: 24px 24px 0 0;
+      background: rgba(12, 5, 20, 0.78);
+      box-shadow: 0 -10px 34px rgba(0,0,0,0.32);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transform: translateY(calc(100% - var(--sheet-peek)));
+      transition: transform 180ms ease, opacity 180ms ease;
+      max-height: var(--sheet-full);
+      overflow: hidden;
+    }
+    .bottom-sheet[data-state="mid"] { transform: translateY(calc(100% - var(--sheet-mid))); }
+    .bottom-sheet[data-state="full"] { transform: translateY(0); }
+
+    .sheet-drag-zone {
+      height: 22px;
+      display: grid;
+      place-items: center;
+    }
+    .sheet-handle {
+      width: 42px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.34);
+    }
+
+    .bottom-sheet .sheet-nav { display: none; }
+    .sheet-scroll {
+      padding: 0 14px 12px;
+      max-height: calc(var(--sheet-full) - 42px);
+      overflow: auto;
+    }
+    .destination-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .destination-hero h2 {
+      margin: 2px 0 0;
+      font-size: 1.16rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .kicker {
+      margin: 0;
+      font-size: 0.66rem;
+      letter-spacing: 0.18em;
+      color: var(--mobile-hot);
+    }
+    .hero-actions { gap: 8px; }
+    .detail-badge {
+      max-width: 112px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .details-grid {
+      margin-top: 12px;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .details-grid > div,
+    .field-card,
+    .tool-card {
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.050);
+      border-radius: 16px;
+      box-shadow: none;
+    }
+    .primary-actions {
+      display: grid;
+      grid-template-columns: 1fr 0.72fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .primary-actions button,
+    .input-row button {
+      min-height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--mobile-hot), var(--mobile-cyan));
+      color: #120019;
+      font-weight: 950;
+    }
+    .secondary-button { background: rgba(255,255,255,0.08) !important; color: var(--mobile-text) !important; }
+    .action-grid { grid-template-columns: repeat(2, 1fr); }
+    .sheet-footer { padding: 0 14px 10px; }
+    .status { margin: 0; font-size: 0.82rem; color: var(--mobile-muted); }
     .bottom-sheet[data-state="peek"] .details-grid,
     .bottom-sheet[data-state="peek"] .action-grid,
-    .bottom-sheet[data-state="peek"] .field-card,
-    .bottom-sheet[data-state="peek"] .tool-card,
-    .bottom-sheet[data-state="peek"] .list-stack,
-    .bottom-sheet[data-state="peek"] .recent-header { display: none; }
+    .bottom-sheet[data-state="peek"] .sheet-footer {
+      display: none;
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0.48);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+    .side-drawer {
+      position: fixed;
+      z-index: 110;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--drawer-width);
+      padding: calc(env(safe-area-inset-top, 0px) + 18px) 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
+      background: rgba(10, 4, 17, 0.94);
+      border-right: 1px solid var(--mobile-border);
+      box-shadow: 18px 0 60px rgba(0,0,0,0.48);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transform: translateX(-104%);
+      transition: transform 190ms ease;
+      overflow: auto;
+    }
+    body.drawer-open .drawer-backdrop { opacity: 1; pointer-events: auto; }
+    body.drawer-open .side-drawer { transform: translateX(0); }
+
+    .drawer-header {
+      display: grid;
+      grid-template-columns: 1fr 42px;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+    .drawer-header p { margin: 0; color: var(--mobile-hot); }
+    .drawer-header h2 { margin: 4px 0 0; font-size: 1.45rem; }
+    .drawer-close {
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      border: 1px solid var(--mobile-border);
+      background: rgba(255,255,255,0.06);
+      color: var(--mobile-text);
+      font-size: 1.35rem;
+    }
+
+    .sheet-nav {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 0;
+      margin-bottom: 14px;
+    }
+    .sheet-tab {
+      justify-content: flex-start;
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.055);
+      color: rgba(255,247,255,0.78);
+      border: 1px solid transparent;
+    }
+    .sheet-tab.is-active {
+      border-color: rgba(255,79,216,0.44);
+      color: #fff;
+      background: rgba(255,79,216,0.12);
+    }
+
+    .drawer-panels .sheet-view { display: none; }
+    .drawer-panels .sheet-view.is-active { display: block; }
+    .drawer-panels .sheet-view[data-view-panel="destination"] { display: none !important; }
+    .drawer-panels .field-card,
+    .drawer-panels .tool-card { margin-bottom: 12px; padding: 14px; }
+    .drawer-panels .section-row { align-items: start; }
+    .drawer-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .drawer-actions button,
+    .reference-link,
+    .utility-button {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.07);
+      color: var(--mobile-text);
+      border-radius: 16px;
+      min-height: 44px;
+      font-weight: 850;
+    }
+    .drawer-note {
+      margin: 18px 0 0;
+      font-size: 0.82rem;
+      color: var(--mobile-muted);
+    }
+
+    .reference-overlay {
+      position: fixed;
+      z-index: 130;
+      inset: 0;
+      padding: calc(env(safe-area-inset-top, 0px) + 14px) 12px calc(env(safe-area-inset-bottom, 0px) + 14px);
+      background: rgba(0,0,0,0.70);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .reference-overlay[hidden] { display: none; }
+    .reference-panel {
+      height: 100%;
+      border: 1px solid var(--mobile-border);
+      border-radius: 24px;
+      background: rgba(10,4,17,0.94);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    .reference-header {
+      display: grid;
+      grid-template-columns: 1fr 44px;
+      gap: 10px;
+      align-items: center;
+      padding: 14px;
+      border-bottom: 1px solid var(--mobile-border);
+    }
+    .reference-header h2 { margin: 4px 0 0; }
+    .reference-scroll { overflow: auto; padding: 12px; }
+    .reference-scroll img { width: 100%; min-width: 840px; height: auto; border-radius: 16px; }
+
+    body.is-boring .app-shell {
+      background: linear-gradient(180deg, #111812, #172019);
+    }
+    body.is-boring .map-stage {
+      background:
+        radial-gradient(circle at 50% 40%, rgba(110, 147, 126, 0.16), transparent 20rem),
+        linear-gradient(180deg, #152119, #0d130f);
+    }
     body.is-boring .schematic-map { opacity: 0.52; filter: none; }
-    body.is-boring .map-zone { stroke: rgba(255,255,255,0.18); fill: rgba(255,255,255,0.025); }
+    body.is-boring .map-zone { stroke: rgba(231,238,232,0.20); fill: rgba(231,238,232,0.026); }
     body.is-boring .map-road { stroke: rgba(231,238,232,0.28); }
     body.is-boring .map-trail { stroke: rgba(231,238,232,0.14); }
+    body.is-boring .kicker { color: #a7d2b4; }
+    body.is-boring .primary-actions button,
+    body.is-boring .input-row button,
+    body.is-boring .site-fab { background: #d9eadf; color: #122017; }
+
+    @media (min-width: 800px) {
+      .mobile-chrome { left: 22px; right: auto; width: min(620px, 54vw); }
+      .bottom-sheet { left: auto; width: 430px; right: 22px; bottom: 0; }
+      .floating-actions { right: 470px; }
+    }
   </style>
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar" aria-labelledby="app-title">
-      <button id="resetMapButton" class="topbar-button" type="button" aria-label="Reset map">
-        <span aria-hidden="true">⌂</span>
-      </button>
-
+      <button id="installButton" class="topbar-button install-button" type="button" hidden aria-label="Install app">＋</button>
       <div class="topbar-title">
         <p>The Woods · After Dark</p>
         <h1 id="app-title">The Woods After Dark</h1>
       </div>
-
-      <button id="installButton" class="topbar-button install-button" type="button" hidden aria-label="Install app">
-        <span aria-hidden="true">＋</span>
-      </button>
     </header>
 
-    <section class="map-screen" aria-labelledby="map-title">
+    <div class="mobile-chrome" aria-label="Map controls">
+      <button id="menuToggleButton" class="chrome-button" type="button" aria-label="Open menu">☰</button>
       <div class="search-panel" role="search">
-        <div class="search-box">
+        <div class="mobile-search">
           <span aria-hidden="true">⌕</span>
           <label class="sr-only" for="searchInput">Search campground destinations</label>
-          <input id="searchInput" type="search" autocomplete="off" placeholder="Find a site, cabin, bathhouse, or excuse…" />
+          <input id="searchInput" type="search" autocomplete="off" placeholder="Site, cabin, bathhouse…" />
           <button id="clearSearchButton" type="button" aria-label="Clear search">×</button>
         </div>
         <div id="searchResults" class="search-results" hidden></div>
       </div>
+      <button id="installMirrorButton" class="chrome-button" type="button" aria-label="After Dark">✦</button>
+    </div>
 
+    <section class="map-screen" aria-labelledby="map-title">
       <div id="mapViewport" class="map-viewport">
-        <div id="mapStage" class="map-stage" aria-label="After Dark utility map">
-          <div class="night-map-glow" aria-hidden="true"></div>
-          <div class="night-map-grid" aria-hidden="true"></div>
+        <div id="mapStage" class="map-stage" aria-label="After Dark campground map">
           <svg class="schematic-map" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-                <feGaussianBlur stdDeviation="0.85" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
             <path class="map-zone map-zone--north" d="M54,5 C68,5 83,14 88,27 C94,44 87,58 74,62 C61,66 45,61 39,49 C31,34 38,12 54,5 Z" />
             <path class="map-zone map-zone--center" d="M29,35 C43,29 59,36 65,50 C70,61 64,73 49,76 C35,79 22,69 19,56 C16,47 20,39 29,35 Z" />
             <path class="map-zone map-zone--grove" d="M8,67 C22,58 39,62 45,75 C50,86 39,96 23,96 C10,96 4,88 5,78 C5,73 6,70 8,67 Z" />
@@ -193,31 +629,15 @@
           <div class="zone-label zone-label--center">Main drag</div>
           <div class="zone-label zone-label--grove">Grove</div>
           <div class="zone-label zone-label--cabins">Cabins</div>
-          <img id="mapImage" class="map-image reference-source" src="assets/woods-map.png" alt="Campground reference map of The Woods Camping Resort" />
+          <img id="mapImage" class="map-image" src="assets/woods-map.png" alt="Hidden resort map geometry reference" />
           <div id="markerLayer" class="marker-layer"></div>
         </div>
       </div>
 
-      <div class="map-card">
+      <div class="map-card" aria-hidden="true">
         <p class="kicker">After Dark utility</p>
         <h2 id="map-title">Find the move</h2>
-        <p>A campsite map with better lighting. Use it however the evening unfolds.</p>
-        <button id="referenceToggleButton" type="button" class="reference-link">Paper map</button>
-      </div>
-
-      <div id="referenceOverlay" class="reference-overlay" hidden>
-        <div class="reference-panel" role="dialog" aria-modal="true" aria-labelledby="referenceTitle">
-          <div class="reference-header">
-            <div>
-              <p class="kicker">Reference only</p>
-              <h2 id="referenceTitle">Resort map</h2>
-            </div>
-            <button id="referenceCloseButton" type="button" class="topbar-button" aria-label="Close resort map">×</button>
-          </div>
-          <div class="reference-scroll">
-            <img src="assets/woods-map.png" alt="Printed campground map reference" />
-          </div>
-        </div>
+        <p>Map first. Menu when needed.</p>
       </div>
 
       <div class="floating-actions" aria-label="Map quick actions">
@@ -225,67 +645,32 @@
         <button id="zoomOutButton" type="button" class="fab" aria-label="Zoom out">−</button>
         <button id="site125Button" type="button" class="fab site-fab" aria-label="Go to Site 125">125</button>
       </div>
-
-      <div id="connectionBadge" class="connection-badge">Offline ready</div>
+      <div id="connectionBadge" class="connection-badge">Online</div>
     </section>
 
-    <section id="bottomSheet" class="bottom-sheet" data-state="peek" aria-labelledby="details-title">
-      <div id="sheetDragHandle" class="sheet-drag-zone" role="button" tabindex="0" aria-label="Drag destination panel">
-        <span class="sheet-handle" aria-hidden="true"></span>
+    <div id="drawerBackdrop" class="drawer-backdrop"></div>
+    <aside id="sideDrawer" class="side-drawer" aria-label="Navigation menu">
+      <div class="drawer-header">
+        <div>
+          <p class="kicker">The Woods</p>
+          <h2>After Dark</h2>
+        </div>
+        <button id="drawerCloseButton" type="button" class="drawer-close" aria-label="Close menu">×</button>
       </div>
 
-      <nav class="sheet-nav" aria-label="Sheet views">
+      <nav class="sheet-nav" aria-label="Menu views">
         <button type="button" class="sheet-tab is-active" data-view="destination">Map</button>
         <button type="button" class="sheet-tab" data-view="find">Find</button>
         <button type="button" class="sheet-tab" data-view="saved">Saved</button>
-        <button type="button" class="sheet-tab" data-view="settings">Discretion</button>
+        <button type="button" class="sheet-tab" data-view="settings">Discreet</button>
       </nav>
 
-      <div class="sheet-scroll">
-        <section class="sheet-view is-active" data-view-panel="destination">
-          <div class="destination-hero">
-            <div>
-              <p id="detailSubtitle" class="kicker">After Dark utility</p>
-              <h2 id="details-title">Ready when you are</h2>
-            </div>
-            <div class="hero-actions">
-              <button id="favoriteButton" type="button" class="icon-chip" aria-label="Add to favorites" disabled>☆</button>
-              <span id="detailBadge" class="detail-badge">Pin mode</span>
-            </div>
-          </div>
+      <div class="drawer-actions">
+        <button id="resetMapButton" type="button">Reset map</button>
+        <button id="paperMapButton" type="button">Paper map</button>
+      </div>
 
-          <dl class="details-grid">
-            <div>
-              <dt>Name</dt>
-              <dd id="detailName">No pin selected</dd>
-            </div>
-            <div>
-              <dt>Type</dt>
-              <dd id="detailType">—</dd>
-            </div>
-            <div>
-              <dt>Coordinates</dt>
-              <dd id="detailCoords">—</dd>
-            </div>
-            <div>
-              <dt>Notes</dt>
-              <dd id="detailNotes">Tap a marker or search a site. After that, it’s just navigation.</dd>
-            </div>
-          </dl>
-
-          <div class="primary-actions">
-            <button id="navigateButton" type="button" disabled>Route me</button>
-            <button id="focusButton" type="button" class="secondary-button" disabled>Center pin</button>
-          </div>
-
-          <div class="action-grid">
-            <button id="shareButton" type="button" class="utility-button" disabled>Share pin</button>
-            <button id="copyButton" type="button" class="utility-button" disabled>Copy pin</button>
-            <button id="appleMapsButton" type="button" class="utility-button" disabled>Apple Maps</button>
-            <button id="googleMapsButton" type="button" class="utility-button" disabled>Google Maps</button>
-          </div>
-        </section>
-
+      <div class="drawer-panels">
         <section class="sheet-view" data-view-panel="find">
           <div class="field-card">
             <label for="siteInput">Find a site, cabin, or code</label>
@@ -293,7 +678,7 @@
               <input id="siteInput" name="site" inputmode="text" pattern="[A-Za-z0-9]*" placeholder="125, G12, F26" />
               <button id="findSiteButton" type="button">Find</button>
             </div>
-            <p class="hint">Estimated pins get you close. Confidence gets you closer. The rest is between you and the woods.</p>
+            <p class="hint">Estimated pins get you close. The rest is between you and the woods.</p>
           </div>
 
           <div class="field-card">
@@ -307,7 +692,7 @@
             <div class="section-row">
               <div>
                 <h3>Layers</h3>
-                <p>Show only what you need: sites, amenities, roads, parking, or the whole campground.</p>
+                <p>Show sites, amenities, roads, parking, or the whole campground.</p>
               </div>
               <button id="showAllButton" type="button" class="text-button">Show all</button>
             </div>
@@ -327,7 +712,7 @@
 
           <div class="section-row recent-header">
             <div>
-              <h3>Recent moves</h3>
+              <h3>Recent</h3>
               <p>Recently viewed pins.</p>
             </div>
             <button id="clearRecentButton" type="button" class="text-button">Clear</button>
@@ -339,7 +724,7 @@
           <div class="tool-card">
             <div>
               <h3>Boring / discreet mode</h3>
-              <p>Neutral colors, cleaner copy, and sensitive labels hidden. For when someone is looking over your shoulder.</p>
+              <p>Neutral colors, cleaner copy, and sensitive labels hidden.</p>
             </div>
             <label class="switch">
               <input id="guestModeToggle" type="checkbox" />
@@ -347,7 +732,7 @@
             </label>
           </div>
 
-          <div class="tool-card after-dark-rules">
+          <div class="tool-card">
             <div>
               <h3>Map rules</h3>
               <p>Respect quiet sites. Don’t out anyone. Don’t be weird. Leave no trace, emotional or otherwise.</p>
@@ -358,7 +743,7 @@
           <div class="tool-card">
             <div>
               <h3>Offline-ready shell</h3>
-              <p>The service worker caches the app shell, map image, and local data for faster loading.</p>
+              <p>The app shell and local data are cached for faster loading.</p>
             </div>
             <span id="offlineStatus" class="mini-badge">Checking…</span>
           </div>
@@ -373,6 +758,63 @@
         </section>
       </div>
 
+      <p class="drawer-note">It’s a map. People can use it how they want.</p>
+    </aside>
+
+    <div id="referenceOverlay" class="reference-overlay" hidden>
+      <div class="reference-panel" role="dialog" aria-modal="true" aria-labelledby="referenceTitle">
+        <div class="reference-header">
+          <div>
+            <p class="kicker">Reference only</p>
+            <h2 id="referenceTitle">Paper map</h2>
+          </div>
+          <button id="referenceCloseButton" type="button" class="drawer-close" aria-label="Close paper map">×</button>
+        </div>
+        <div class="reference-scroll">
+          <img src="assets/woods-map.png" alt="Printed campground map reference" />
+        </div>
+      </div>
+    </div>
+
+    <section id="bottomSheet" class="bottom-sheet" data-state="peek" aria-labelledby="details-title">
+      <div id="sheetDragHandle" class="sheet-drag-zone" role="button" tabindex="0" aria-label="Open destination actions">
+        <span class="sheet-handle" aria-hidden="true"></span>
+      </div>
+
+      <div class="sheet-scroll">
+        <section class="sheet-view is-active" data-view-panel="destination">
+          <div class="destination-hero">
+            <div>
+              <p id="detailSubtitle" class="kicker">After Dark utility</p>
+              <h2 id="details-title">Ready when you are</h2>
+            </div>
+            <div class="hero-actions">
+              <button id="favoriteButton" type="button" class="icon-chip" aria-label="Add to favorites" disabled>☆</button>
+              <span id="detailBadge" class="detail-badge">Pin mode</span>
+            </div>
+          </div>
+
+          <dl class="details-grid">
+            <div><dt>Name</dt><dd id="detailName">No pin selected</dd></div>
+            <div><dt>Type</dt><dd id="detailType">—</dd></div>
+            <div><dt>Coordinates</dt><dd id="detailCoords">—</dd></div>
+            <div><dt>Notes</dt><dd id="detailNotes">Tap a marker or search a site. After that, it’s just navigation.</dd></div>
+          </dl>
+
+          <div class="primary-actions">
+            <button id="navigateButton" type="button" disabled>Route</button>
+            <button id="focusButton" type="button" class="secondary-button" disabled>Center</button>
+          </div>
+
+          <div class="action-grid">
+            <button id="shareButton" type="button" class="utility-button" disabled>Share</button>
+            <button id="copyButton" type="button" class="utility-button" disabled>Copy</button>
+            <button id="appleMapsButton" type="button" class="utility-button" disabled>Apple Maps</button>
+            <button id="googleMapsButton" type="button" class="utility-button" disabled>Google Maps</button>
+          </div>
+        </section>
+      </div>
+
       <footer class="sheet-footer">
         <p id="statusMessage" class="status" role="status" aria-live="polite"></p>
       </footer>
@@ -381,40 +823,76 @@
 
   <script type="module" src="app.js"></script>
   <script type="module">
-    const afterDarkCopy = () => !document.body.classList.contains('is-boring');
-    const text = (selector, dark, boring = dark) => {
-      const el = document.querySelector(selector);
-      if (el) el.textContent = afterDarkCopy() ? dark : boring;
+    const body = document.body;
+    const drawer = document.querySelector('#sideDrawer');
+    const menuButton = document.querySelector('#menuToggleButton');
+    const closeButton = document.querySelector('#drawerCloseButton');
+    const backdrop = document.querySelector('#drawerBackdrop');
+    const referenceOverlay = document.querySelector('#referenceOverlay');
+    const paperMapButton = document.querySelector('#paperMapButton');
+    const referenceCloseButton = document.querySelector('#referenceCloseButton');
+    const installMirrorButton = document.querySelector('#installMirrorButton');
+
+    const openDrawer = () => {
+      body.classList.add('drawer-open');
+      menuButton?.setAttribute('aria-expanded', 'true');
     };
-    const value = (selector, dark, boring = dark) => {
-      const el = document.querySelector(selector);
-      if (el) el.placeholder = afterDarkCopy() ? dark : boring;
+    const closeDrawer = () => {
+      body.classList.remove('drawer-open');
+      menuButton?.setAttribute('aria-expanded', 'false');
     };
-    const patchUtilityCopy = () => {
-      text('#map-title', 'Find the move', 'Tap a marker');
-      text('.map-card .kicker', 'After Dark utility', 'Destination map');
-      const copy = document.querySelector('.map-card p:last-child');
-      if (copy) copy.textContent = afterDarkCopy()
-        ? 'A campsite map with better lighting. Use it however the evening unfolds.'
-        : 'Clean destination view. Open the resort map only when needed.';
-      value('#searchInput', 'Find a site, cabin, bathhouse, or excuse…', 'Search map, sites, POIs, bathhouses…');
-      text('[data-view="destination"]', 'Map');
-      text('[data-view="find"]', 'Find');
-      text('[data-view="saved"]', 'Saved');
-      text('[data-view="settings"]', 'Discreet');
-      text('#details-title', 'Ready when you are', 'Ready when you are');
-      text('#detailSubtitle', 'After Dark utility', 'Select a destination');
-      text('#detailBadge', 'Pin mode', 'Waiting');
-      text('#navigateButton', 'Route me', 'Navigate');
-      text('#focusButton', 'Center pin', 'Center');
-      text('#copyButton', 'Copy pin', 'Copy coordinates');
-      text('#shareButton', 'Share pin', 'Share');
-      text('#findSiteButton', 'Find', 'Find');
-      text('#showAllButton', 'Show all', 'Show all');
-      text('#homeBaseButton', 'Back to 125', 'Go to Site 125');
+
+    menuButton?.addEventListener('click', openDrawer);
+    closeButton?.addEventListener('click', closeDrawer);
+    backdrop?.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeDrawer();
+        referenceOverlay.hidden = true;
+      }
+    });
+
+    document.querySelectorAll('.side-drawer .sheet-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        if (tab.dataset.view === 'destination') closeDrawer();
+      });
+    });
+
+    paperMapButton?.addEventListener('click', () => {
+      referenceOverlay.hidden = false;
+      closeDrawer();
+    });
+    referenceCloseButton?.addEventListener('click', () => {
+      referenceOverlay.hidden = true;
+    });
+    referenceOverlay?.addEventListener('click', (event) => {
+      if (event.target === referenceOverlay) referenceOverlay.hidden = true;
+    });
+
+    installMirrorButton?.addEventListener('click', () => openDrawer());
+
+    const utilityCopy = () => {
+      const boring = document.body.classList.contains('is-boring');
+      const setText = (selector, dark, plain = dark) => {
+        const el = document.querySelector(selector);
+        if (el) el.textContent = boring ? plain : dark;
+      };
+      const setPlaceholder = (selector, dark, plain = dark) => {
+        const el = document.querySelector(selector);
+        if (el) el.placeholder = boring ? plain : dark;
+      };
+      setPlaceholder('#searchInput', 'Site, cabin, bathhouse…', 'Search destinations…');
+      setText('#details-title', 'Ready when you are', 'Ready when you are');
+      setText('#detailSubtitle', 'After Dark utility', 'Select a destination');
+      setText('#detailBadge', 'Pin mode', 'Waiting');
+      setText('#navigateButton', 'Route', 'Navigate');
+      setText('#focusButton', 'Center');
+      setText('#copyButton', 'Copy', 'Copy coordinates');
+      setText('#shareButton', 'Share');
+      setText('#homeBaseButton', 'Back to 125', 'Go to Site 125');
     };
-    patchUtilityCopy();
-    document.querySelector('#guestModeToggle')?.addEventListener('change', () => setTimeout(patchUtilityCopy, 0));
+    utilityCopy();
+    document.querySelector('#guestModeToggle')?.addEventListener('change', () => setTimeout(utilityCopy, 0));
   </script>
 </body>
 </html>
