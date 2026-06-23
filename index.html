@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#06110c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Camp Nav" />
+  <title>Campground Navigator</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar" aria-labelledby="app-title">
+      <button id="resetMapButton" class="topbar-button" type="button" aria-label="Reset map">
+        <span aria-hidden="true">⌂</span>
+      </button>
+
+      <div class="topbar-title">
+        <p>The Woods Camping Resort</p>
+        <h1 id="app-title">Campground Navigator</h1>
+      </div>
+
+      <button id="installButton" class="topbar-button install-button" type="button" hidden aria-label="Install app">
+        <span aria-hidden="true">＋</span>
+      </button>
+    </header>
+
+    <section class="map-screen" aria-labelledby="map-title">
+      <div class="search-panel" role="search">
+        <div class="search-box">
+          <span aria-hidden="true">⌕</span>
+          <label class="sr-only" for="searchInput">Search campground destinations</label>
+          <input id="searchInput" type="search" autocomplete="off" placeholder="Search map, POIs, bathhouses…" />
+          <button id="clearSearchButton" type="button" aria-label="Clear search">×</button>
+        </div>
+        <div id="searchResults" class="search-results" hidden></div>
+      </div>
+
+      <div id="mapViewport" class="map-viewport">
+        <div id="mapStage" class="map-stage">
+          <img id="mapImage" class="map-image" src="assets/woods-map.png" alt="Campground map of The Woods Camping Resort" />
+          <div id="markerLayer" class="marker-layer"></div>
+        </div>
+      </div>
+
+      <div class="map-card">
+        <p class="kicker">Interactive map</p>
+        <h2 id="map-title">Tap a marker</h2>
+        <p>Pinch, pan, search, favorite, share, or navigate.</p>
+      </div>
+
+      <div class="floating-actions" aria-label="Map quick actions">
+        <button id="zoomInButton" type="button" class="fab" aria-label="Zoom in">+</button>
+        <button id="zoomOutButton" type="button" class="fab" aria-label="Zoom out">−</button>
+        <button id="site125Button" type="button" class="fab site-fab" aria-label="Go to Site 125">125</button>
+      </div>
+
+      <div id="connectionBadge" class="connection-badge">Offline ready</div>
+    </section>
+
+    <section id="bottomSheet" class="bottom-sheet" data-state="mid" aria-labelledby="details-title">
+      <div id="sheetDragHandle" class="sheet-drag-zone" role="button" tabindex="0" aria-label="Drag destination panel">
+        <span class="sheet-handle" aria-hidden="true"></span>
+      </div>
+
+      <nav class="sheet-nav" aria-label="Sheet views">
+        <button type="button" class="sheet-tab is-active" data-view="destination">Destination</button>
+        <button type="button" class="sheet-tab" data-view="find">Find</button>
+        <button type="button" class="sheet-tab" data-view="saved">Saved</button>
+        <button type="button" class="sheet-tab" data-view="settings">Tools</button>
+      </nav>
+
+      <div class="sheet-scroll">
+        <section class="sheet-view is-active" data-view-panel="destination">
+          <div class="destination-hero">
+            <div>
+              <p id="detailSubtitle" class="kicker">Select a destination</p>
+              <h2 id="details-title">Ready when you are</h2>
+            </div>
+            <div class="hero-actions">
+              <button id="favoriteButton" type="button" class="icon-chip" aria-label="Add to favorites" disabled>☆</button>
+              <span id="detailBadge" class="detail-badge">Waiting</span>
+            </div>
+          </div>
+
+          <dl class="details-grid">
+            <div>
+              <dt>Name</dt>
+              <dd id="detailName">None selected</dd>
+            </div>
+            <div>
+              <dt>Type</dt>
+              <dd id="detailType">—</dd>
+            </div>
+            <div>
+              <dt>Coordinates</dt>
+              <dd id="detailCoords">—</dd>
+            </div>
+            <div>
+              <dt>Notes</dt>
+              <dd id="detailNotes">Tap a marker or search to center the map and open native navigation.</dd>
+            </div>
+          </dl>
+
+          <div class="primary-actions">
+            <button id="navigateButton" type="button" disabled>Navigate</button>
+            <button id="focusButton" type="button" class="secondary-button" disabled>Center</button>
+          </div>
+
+          <div class="action-grid">
+            <button id="shareButton" type="button" class="utility-button" disabled>Share</button>
+            <button id="copyButton" type="button" class="utility-button" disabled>Copy coordinates</button>
+            <button id="appleMapsButton" type="button" class="utility-button" disabled>Apple Maps</button>
+            <button id="googleMapsButton" type="button" class="utility-button" disabled>Google Maps</button>
+          </div>
+        </section>
+
+        <section class="sheet-view" data-view-panel="find">
+          <div class="field-card">
+            <label for="siteInput">Jump to campsite or code</label>
+            <div class="input-row">
+              <input id="siteInput" name="site" inputmode="text" pattern="[A-Za-z0-9]*" placeholder="125, G12, F26" />
+              <button id="findSiteButton" type="button">Find</button>
+            </div>
+            <p class="hint">The imported KML currently includes Site 125 as the only campsite coordinate.</p>
+          </div>
+
+          <div class="field-card">
+            <label for="destinationSelect">Directory</label>
+            <select id="destinationSelect">
+              <option value="">Choose a destination</option>
+            </select>
+          </div>
+
+          <div class="field-card">
+            <div class="section-row">
+              <div>
+                <h3>Map layers</h3>
+                <p>Choose what markers appear on the map.</p>
+              </div>
+              <button id="showAllButton" type="button" class="text-button">Show all</button>
+            </div>
+            <div id="filterChips" class="filter-chips"></div>
+          </div>
+        </section>
+
+        <section class="sheet-view" data-view-panel="saved">
+          <div class="section-row">
+            <div>
+              <h3>Favorites</h3>
+              <p>Saved on this device.</p>
+            </div>
+            <button id="clearFavoritesButton" type="button" class="text-button">Clear</button>
+          </div>
+          <div id="favoritesList" class="list-stack empty-list">No favorites yet.</div>
+
+          <div class="section-row recent-header">
+            <div>
+              <h3>Recent</h3>
+              <p>Your last viewed destinations.</p>
+            </div>
+            <button id="clearRecentButton" type="button" class="text-button">Clear</button>
+          </div>
+          <div id="recentList" class="list-stack empty-list">No recent destinations yet.</div>
+        </section>
+
+        <section class="sheet-view" data-view-panel="settings">
+          <div class="tool-card">
+            <div>
+              <h3>Guest-safe labels</h3>
+              <p>Hide private/social destination labels from search, directory, and markers.</p>
+            </div>
+            <label class="switch">
+              <input id="guestModeToggle" type="checkbox" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="tool-card">
+            <div>
+              <h3>Offline app shell</h3>
+              <p>The service worker caches the app shell, map image, and local data for faster loading.</p>
+            </div>
+            <span id="offlineStatus" class="mini-badge">Checking…</span>
+          </div>
+
+          <div class="tool-card">
+            <div>
+              <h3>Home base</h3>
+              <p>Site 125 is pinned as the cabin quick action.</p>
+            </div>
+            <button id="homeBaseButton" type="button" class="utility-button">Open Site 125</button>
+          </div>
+        </section>
+      </div>
+
+      <footer class="sheet-footer">
+        <p id="statusMessage" class="status" role="status" aria-live="polite"></p>
+      </footer>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
