@@ -25,19 +25,64 @@ const categoryLabels = {
 };
 
 const shortcutDestinations = {
-  groveParking: {
-    id: 'shortcut-grove-parking',
-    name: 'Grove Parking',
-    displayName: 'Grove Parking',
-    lat: 40.8975516,
-    lng: -75.6016636,
-    category: 'parking',
+  fortDix: {
+    id: 'shortcut-fort-dix',
+    name: 'Fort Dix',
+    displayName: 'Fort Dix',
+    lat: 40.895742,
+    lng: -75.604859,
+    category: 'poi',
     siteNumber: null,
-    sourceGeometry: 'Polygon centroid from updated KML',
+    sourceGeometry: 'Point from updated KML',
     estimated: false,
-    searchText: 'grove parking parking lot area',
+    searchText: 'fort dix ft dix',
+  },
+  theGrove: {
+    id: 'shortcut-the-grove',
+    name: 'The Grove',
+    displayName: 'The Grove',
+    lat: 40.8971525,
+    lng: -75.6026547,
+    category: 'area',
+    siteNumber: null,
+    sourceGeometry: 'The Grove Camping Area polygon centroid from updated KML',
+    estimated: false,
+    searchText: 'the grove grove camping area',
+  },
+  theAfters: {
+    id: 'shortcut-the-afters',
+    name: 'The Afters in Triangle Field',
+    displayName: 'The Afters in Triangle Field',
+    lat: 40.8992354,
+    lng: -75.5984093,
+    category: 'poi',
+    siteNumber: null,
+    sourceGeometry: 'Triangle Field point from updated KML',
+    estimated: false,
+    searchText: 'afters afters triangle field',
+  },
+  cabin125: {
+    id: 'shortcut-cabin-125',
+    name: 'Back to the Cabin at 125',
+    displayName: 'Back to the Cabin at 125',
+    lat: 40.8980997,
+    lng: -75.6060225,
+    category: 'campsite',
+    siteNumber: '125',
+    sourceGeometry: 'Site 125 point from updated KML',
+    estimated: false,
+    searchText: 'cabin 125 site 125 back to cabin',
   },
 };
+
+const bathhouses = [
+  { name: 'Sophia', lat: 40.898128, lng: -75.605151 },
+  { name: 'Rose', lat: 40.898241, lng: -75.606721 },
+  { name: 'Dorothy', lat: 40.897621, lng: -75.606501 },
+  { name: 'Blanch', lat: 40.895967, lng: -75.604879 },
+  { name: 'Coco', lat: 40.897127, lng: -75.603212 },
+  { name: 'Stanley', lat: 40.897795, lng: -75.602405 },
+];
 
 let locations = buildLocations();
 let boringMode = readBoringMode();
@@ -152,9 +197,9 @@ function createResultCard(location) {
 
   const type = categoryLabels[location.category] || location.category;
   const confidence = location.estimated ? `Estimated${location.confidence ? ` · ${location.confidence}` : ''}` : 'Known pin';
-  const note = boringMode
+  const note = location.note || (boringMode
     ? `${type} · ${confidence}`
-    : `${type} · ${confidence}. Use it however the evening unfolds.`;
+    : `${type} · ${confidence}. Use it however the evening unfolds.`);
 
   card.innerHTML = `
     <div class="result-main">
@@ -235,6 +280,70 @@ function escapeHtml(value) {
   }[char]));
 }
 
+function distanceFeet(a, b) {
+  const earthRadiusFeet = 20902231;
+  const toRad = (degrees) => degrees * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * earthRadiusFeet * Math.asin(Math.sqrt(h));
+}
+
+function getCurrentPosition() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation is not available in this browser.'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 30000,
+    });
+  });
+}
+
+async function showClosestBathroom() {
+  els.summary.textContent = 'Finding the closest bathroom…';
+  els.results.innerHTML = '';
+
+  try {
+    const position = await getCurrentPosition();
+    const here = {
+      lat: position.coords.latitude,
+      lng: position.coords.longitude,
+    };
+
+    const nearest = bathhouses
+      .map((bathhouse) => ({ ...bathhouse, distanceFeet: distanceFeet(here, bathhouse) }))
+      .sort((a, b) => a.distanceFeet - b.distanceFeet)[0];
+
+    const location = {
+      id: `nearest-bathhouse-${nearest.name.toLowerCase()}`,
+      name: nearest.name,
+      displayName: `Closest bathroom: ${nearest.name}`,
+      lat: nearest.lat,
+      lng: nearest.lng,
+      category: 'bathhouse',
+      sourceGeometry: 'Nearest bathhouse from updated KML',
+      estimated: false,
+      note: `About ${Math.round(nearest.distanceFeet)} feet away from your current location.`,
+    };
+
+    els.input.value = 'Closest bathroom';
+    renderResults([location], location.displayName);
+  } catch {
+    els.summary.textContent = 'I need location permission to find the closest bathroom.';
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = 'Turn on location permission for this site, or search bathhouse and pick one manually.';
+    els.results.append(empty);
+  }
+}
+
 els.form.addEventListener('submit', (event) => {
   event.preventDefault();
   renderResults(searchLocations(els.input.value), els.input.value);
@@ -252,6 +361,11 @@ els.clear.addEventListener('click', () => {
 
 document.querySelectorAll('[data-query], [data-shortcut]').forEach((button) => {
   button.addEventListener('click', () => {
+    if (button.dataset.shortcut === 'closestBathroom') {
+      showClosestBathroom();
+      return;
+    }
+
     const shortcut = button.dataset.shortcut ? shortcutDestinations[button.dataset.shortcut] : null;
 
     if (shortcut) {
