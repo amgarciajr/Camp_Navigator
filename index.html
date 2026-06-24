@@ -7,7 +7,7 @@
   <title>The Woods After Dark</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=quickfix-1" />
 </head>
 <body>
   <main class="app-shell">
@@ -39,6 +39,9 @@
         <button type="button" data-shortcut="closestBathroom">Closest bathroom</button>
       </div>
 
+      <div id="resultSummary" class="summary" role="status" aria-live="polite">Start with a site number, destination name, or alias.</div>
+      <div id="results" class="results" aria-label="Search results"></div>
+
       <section class="event-panel" aria-labelledby="eventTitle">
         <div class="event-panel-header">
           <div>
@@ -51,8 +54,6 @@
       </section>
 
       <div class="respect-note">Consent only. Respect privacy, quiet hours, posted rules, and each other. Sparkle responsibly.</div>
-      <div id="resultSummary" class="summary" role="status" aria-live="polite">Start with a site number, destination name, or alias.</div>
-      <div id="results" class="results" aria-label="Search results"></div>
     </section>
 
     <footer class="utility-bar" aria-label="Utility actions">
@@ -76,7 +77,7 @@
     </div>
   </main>
 
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=quickfix-1"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
