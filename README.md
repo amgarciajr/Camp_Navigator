@@ -1,42 +1,62 @@
-# Campground Navigator — Fully Featured Mobile App Build
+# The Woods After Dark — Camp Navigator
 
-This package turns the original standalone HTML/CSS/JS navigator into a fuller native-style mobile web app.
+A mobile-first, offline-friendly campground companion for **The Woods Camping Resort**. The app helps guests find campsites, bathhouses, named areas, social destinations, event-weekend touring spots, and a saved home base using fast native map handoff.
 
-## Major value-add features
+## Ownership
 
-- Full-screen native-style mobile layout
-- Interactive campground map using the supplied Woods map image
-- Tap/click map markers
-- Pinch, pan, wheel zoom, and floating zoom controls
-- Draggable bottom sheet with peek, mid, and full states
-- Global search with instant results
-- POI / bathhouse / area directory
-- Fast campsite numeric lookup
-- Site 125 home-base quick action
-- Category layer filters
-- Selected destination card
-- Native `geo:0,0?q=[lat],[lng]` navigation
-- Apple Maps and Google Maps fallback buttons
-- Favorites saved to local storage
-- Recent destinations saved to local storage
-- Share destination using the Web Share API where available
-- Copy coordinates to clipboard
-- Guest-safe label toggle
-- Offline app shell via service worker
-- PWA manifest for Add to Home Screen support
+**Project owner, creator, and maintainer: Mike Garcia.**
 
-## Current dataset
+This repository, application concept, source code organization, campground navigation workflow, destination/alias mapping, After Dark product direction, event-companion model, and all project-specific implementation decisions are owned by **Mike Garcia** unless otherwise stated in a separate written agreement.
 
-Generated from the supplied KML plus estimated campsite positions from the supplied campground map image.
+All rights are reserved by Mike Garcia. No transfer of ownership, license, resale right, or commercial usage right is granted by the presence of this repository alone.
 
-- `DESTINATIONS`: 52 KML destinations
-- `CAMPSITES`: 248 campsite records
-  - 1 known KML coordinate: Site 125
-  - 174 plain numeric site records
-  - 1 alpha numeric record: Site 37B
-  - 65 Grove records: G1-G65
+## Product direction
 
-Estimated campsite records are marked with:
+This app is intentionally built as a **sex-positive, inclusive, rule-respecting campground companion**. It is not trying to hide the adult/social nature of the venue. It is designed to be playful, useful, respectful, and privacy-aware.
+
+Core principles:
+
+- Consent only.
+- Respect privacy and boundaries.
+- Follow posted campground rules.
+- Keep shared paths and community spaces welcoming.
+- Use official/public event information and user-provided map data.
+- Do not scrape, infer, or expose private guest behavior.
+
+## Current experience
+
+- Pride-forward After Dark visual theme with rainbow borders, neon glow, and mobile-first UI.
+- Native map handoff using `geo:0,0?q=[lat],[lng]` where supported.
+- Fast destination search with aliases and duplicate-safe results.
+- Quick actions for Fort Dix, The Grove, The Afters, Cabin 125, and closest bathroom.
+- Closest-bathroom helper using browser geolocation.
+- Calendar-aware event layer using public Woods theme-week/weekend blocks.
+- Decoration-tour handling for Christmas in July, Illumination, and Festival of Lights weekends.
+- Resort Mode toggle for a more neutral visual presentation.
+- Paper-map reference overlay.
+
+## Calendar/event layer
+
+The public Woods calendar currently provides all-day theme blocks rather than individual hourly venue events. The app maps those blocks to suggested destinations instead of claiming exact event venues.
+
+Examples:
+
+- **Summer Heat / Key West** → Pool, Pavilion, Fort Dix, The Afters.
+- **Bear / OktoBear** → Pavilion, Pool, Fort Dix, The Afters.
+- **Country / Leather** → Pavilion, Fort Dix, The Afters, Bonfire Pit.
+- **Christmas in July / Illumination / Festival of Lights** → campground-wide decoration tour.
+
+Decoration-tour weekends are treated as campground-wide walking/touring experiences with suggested route stops such as The Grove, Grove Parking, Walnut Loop, Diversity Way, Pavilion, Bonfire Pit, and Cabin 125.
+
+## Dataset
+
+The navigation dataset is generated from supplied KML data plus estimated campsite positions from supplied campground map references.
+
+- `DESTINATIONS`: KML-derived destinations and areas.
+- `CAMPSITES`: campsite records, including estimated records where needed.
+- Estimated coordinates are intended for guest navigation and are not survey-grade pad, utility, or property-boundary coordinates.
+
+Estimated campsite records may include:
 
 ```js
 estimated: true,
@@ -44,24 +64,21 @@ sourceGeometry: "EstimatedFromMap",
 confidence: "high" | "medium" | "low"
 ```
 
-These coordinates are intended for guest navigation and should get users close to the correct site. They are not survey-grade pad or utility-hookup coordinates.
-
 ## Files
 
-- `index.html` — full-screen app shell
-- `styles.css` — native-style mobile UI
-- `app.js` — app logic, search, pan/zoom, sheet states, favorites, recent, sharing, and navigation
-- `data.js` — generated location data
-- `service-worker.js` — offline cache
-- `manifest.webmanifest` — PWA metadata
-- `assets/woods-map.png` — visual map base layer
-- `assets/icon.svg` — PWA icon
-- `Dockerfile` — nginx static hosting
+- `index.html` — mobile app shell and event companion layout.
+- `styles.css` — Pride-forward After Dark UI and Resort Mode styling.
+- `app.js` — search, aliases, shortcut routing, closest-bathroom logic, event-card rendering, and map handoff.
+- `events.js` — public calendar theme blocks and event-to-destination mapping rules.
+- `data.js` — generated campground destination and campsite data.
+- `manifest.webmanifest` — PWA metadata.
+- `assets/woods-map.png` — paper/reference map image.
+- `assets/icon.svg` — app icon.
+- `Dockerfile` — nginx static hosting.
 
 ## Run locally
 
 ```bash
-cd campground-navigator-pro
 python3 -m http.server 8080
 ```
 
@@ -74,8 +91,8 @@ http://localhost:8080
 ## Run with Docker
 
 ```bash
-docker build -t campground-navigator .
-docker run --rm -p 8080:80 campground-navigator
+docker build -t woods-after-dark .
+docker run --rm -p 8080:80 woods-after-dark
 ```
 
 Open:
@@ -86,45 +103,12 @@ http://localhost:8080
 
 ## Deploy on Umbrel
 
-Use this as a static site served by nginx or any lightweight web server container next to Home Assistant. No build step is required.
+Serve this as a static site with nginx or another lightweight web server container. No build step is required.
 
+## Privacy stance
 
-## Update: Diversity Way F26-F33
+This build does not scrape or infer private hookup behavior from social media or private sources. It uses supplied map/KML data, public calendar blocks, and explicit project direction from Mike Garcia. Adult/social language is place-based, consent-forward, and privacy-first.
 
-Added estimated records for the missed Diversity Way F-sites:
+## Legal / rights notice
 
-```text
-F26, F27, F28, F29, F30, F31, F32, F33
-```
-
-These are marked `estimated: true`, `confidence: "medium"`, and `sourceGeometry: "EstimatedFromMap"`. They are suitable for guest navigation but should be verified in the Google satellite calibration page before treating them as final.
-
-
-## Final calibration merge
-
-Imported `corrected-campsites.json` from the Google satellite calibration workflow.
-
-- Campsite records: 248
-- Export timestamp: 2026-06-23T18:12:02.454Z
-- Export-reported changed records: 1
-- Merge report: `MERGE_REPORT.md`
-
-The app still uses the Woods resort map as the guest-facing visual layer and uses corrected campsite latitude/longitude values for navigation.
-
-
-## After Dark primary release
-
-This build makes **After Dark** the default product personality and keeps the neutral/boring version as an opt-in **Boring / discreet mode** in the Discretion tab.
-
-### Included
-
-- Neon late-night color system: fuchsia, violet, cyan, midnight plum
-- Sassy but usable app copy
-- "The Move", "Hunt", "Little Black Book", and "Discretion" tabs
-- Boring/discreet mode that switches back to neutral colors and hides spicy/social labels
-- After Dark rules card: consent, privacy, quiet sites, and no outing
-- Uses the corrected campsite export already merged into `data.js`
-
-### Privacy stance
-
-This build does not scrape or infer private hookup behavior from social media. It uses the campsite/POI data already provided and keeps any after-dark language place-based, playful, and privacy-first.
+Copyright and project ownership are retained by **Mike Garcia**. All rights reserved.
