@@ -1,12 +1,15 @@
 {
   "name": "The Woods After Dark",
-  "short_name": "After Dark",
-  "start_url": ".",
-  "scope": ".",
+  "short_name": "Woods AD",
+  "description": "A Pride-forward, sex-positive, rule-respecting campground companion for The Woods Camping Resort.",
+  "id": "/",
+  "start_url": "./?source=pwa",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#090011",
-  "theme_color": "#140019",
-  "description": "A playful after-dark campground navigator for The Woods, with discreet mode built in.",
+  "orientation": "portrait",
+  "background_color": "#07030d",
+  "theme_color": "#08050f",
+  "categories": ["navigation", "travel", "lifestyle"],
   "icons": [
     {
       "src": "assets/icon.svg",
