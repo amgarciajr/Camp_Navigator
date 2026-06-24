@@ -71,35 +71,18 @@ applyMode();
 renderDefault();
 renderEvents();
 
-function readResortMode() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'false'); } catch { return false; }
-}
-
+function readResortMode() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'false'); } catch { return false; } }
 function writeResortMode() { localStorage.setItem(STORAGE_KEY, JSON.stringify(resortMode)); }
-
 function applyMode() {
   document.body.classList.toggle('is-boring', resortMode);
   els.discreetButton.textContent = resortMode ? 'After Dark' : 'Resort mode';
   els.discreetButton.setAttribute('aria-pressed', String(resortMode));
   document.title = resortMode ? 'Campground Navigator' : 'The Woods After Dark';
 }
-
-function normalize(value) {
-  return String(value ?? '').trim().toUpperCase().replace(/\s+/g, '').replace(/^([A-Z]+)0+(\d)/, '$1$2').replace(/^0+(\d)/, '$1');
-}
-
-function normalizeName(value) {
-  return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
-}
-
+function normalize(value) { return String(value ?? '').trim().toUpperCase().replace(/\s+/g, '').replace(/^([A-Z]+)0+(\d)/, '$1$2').replace(/^0+(\d)/, '$1'); }
+function normalizeName(value) { return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' '); }
 function friendlyName(name) { return canonicalDestinationNames[normalizeName(name)] || name; }
-
-function aliasesFor(displayName, rawName) {
-  const aliases = new Set([...(commonAliases[displayName] || []), ...(commonAliases[rawName] || [])]);
-  if (displayName !== rawName) aliases.add(rawName);
-  return [...aliases];
-}
-
+function aliasesFor(displayName, rawName) { const aliases = new Set([...(commonAliases[displayName] || []), ...(commonAliases[rawName] || [])]); if (displayName !== rawName) aliases.add(rawName); return [...aliases]; }
 function makeDuplicateSafeNames(items) {
   const counts = new Map();
   items.forEach((item) => counts.set(item.displayName, (counts.get(item.displayName) || 0) + 1));
@@ -112,27 +95,18 @@ function makeDuplicateSafeNames(items) {
     return { ...item, displayName: `${item.displayName} ${next}`, aliases: [...new Set([...(item.aliases || []), item.displayName])], duplicateGroupName: item.displayName };
   });
 }
-
-function buildSearchText(location) {
-  return [location.displayName, location.name, location.siteNumber, location.category, categoryLabels[location.category], ...(location.aliases || [])].filter(Boolean).join(' ').toLowerCase();
-}
-
+function buildSearchText(location) { return [location.displayName, location.name, location.siteNumber, location.category, categoryLabels[location.category], ...(location.aliases || [])].filter(Boolean).join(' ').toLowerCase(); }
 function buildLocations() {
   const destinationItems = DESTINATIONS.map((destination, index) => {
     const displayName = friendlyName(destination.name);
     return { ...destination, id: `poi-${index}`, category: destination.category || 'poi', siteNumber: null, displayName, aliases: aliasesFor(displayName, destination.name) };
   });
-
   const campsiteItems = Object.entries(CAMPSITES).map(([siteNumber, site]) => {
     const displayName = siteNumber === '125' ? 'Back to the Cabin at 125' : (site.name || `Site ${siteNumber}`);
     return { ...site, id: `site-${siteNumber}`, category: 'campsite', siteNumber, displayName, aliases: siteNumber === '125' ? commonAliases['Back to the Cabin at 125'] : [`Site ${siteNumber}`, siteNumber] };
   });
-
-  return makeDuplicateSafeNames([...campsiteItems, ...destinationItems])
-    .map((location) => ({ ...location, searchText: buildSearchText(location) }))
-    .sort((a, b) => a.displayName.localeCompare(b.displayName, undefined, { numeric: true }));
+  return makeDuplicateSafeNames([...campsiteItems, ...destinationItems]).map((location) => ({ ...location, searchText: buildSearchText(location) })).sort((a, b) => a.displayName.localeCompare(b.displayName, undefined, { numeric: true }));
 }
-
 function dedupeMatches(matches) {
   const seen = new Set();
   return matches.filter((location) => {
@@ -142,46 +116,36 @@ function dedupeMatches(matches) {
     return true;
   });
 }
-
 function searchLocations(query) {
   const raw = String(query || '').trim();
   if (!raw) return [];
   const normalized = normalize(raw);
   const lower = raw.toLowerCase();
   const normalizedRaw = normalizeName(raw);
-
   const exactSite = locations.find((location) => location.category === 'campsite' && String(location.siteNumber ?? '').toUpperCase() === normalized);
   const exactNameOrAlias = locations.find((location) => {
     if (location.id === exactSite?.id) return false;
     return [location.displayName, location.name, ...(location.aliases || [])].map(normalizeName).includes(normalizedRaw);
   });
-
   const starts = locations.filter((location) => {
     if (location.id === exactSite?.id || location.id === exactNameOrAlias?.id) return false;
     return [location.displayName, location.name, ...(location.aliases || [])].filter(Boolean).some((value) => value.toLowerCase().startsWith(lower)) || String(location.siteNumber ?? '').toLowerCase().startsWith(lower);
   });
-
   const contains = locations.filter((location) => {
     if (location.id === exactSite?.id || location.id === exactNameOrAlias?.id) return false;
     if (starts.some((item) => item.id === location.id)) return false;
     return location.searchText.includes(lower);
   });
-
   return dedupeMatches([exactSite, exactNameOrAlias, ...starts, ...contains].filter(Boolean)).slice(0, 8);
 }
-
 function findDestinationByName(name) {
   const fromShortcut = Object.values(shortcutDestinations).find((location) => normalizeName(location.displayName) === normalizeName(name) || (location.aliases || []).map(normalizeName).includes(normalizeName(name)));
   if (fromShortcut) return fromShortcut;
   return searchLocations(name)[0] || null;
 }
-
-function renderDefault() {
-  els.results.innerHTML = '';
-  els.summary.textContent = 'Start with a site number, destination name, or alias.';
-}
-
-function renderResults(matches, query) {
+function renderDefault() { els.results.innerHTML = ''; els.summary.textContent = 'Start with a site number, destination name, or alias.'; }
+function revealResults() { els.summary.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+function renderResults(matches, query, reveal = false) {
   els.results.innerHTML = '';
   if (!query.trim()) { renderDefault(); return; }
   if (!matches.length) {
@@ -190,12 +154,13 @@ function renderResults(matches, query) {
     empty.className = 'empty';
     empty.textContent = 'Try 125, Ft. Dix, The Afters, Grove, BodyShop, bathroom, comfort station, pool, or Pavilion.';
     els.results.append(empty);
+    if (reveal) revealResults();
     return;
   }
   els.summary.textContent = matches.length === 1 ? 'One match. Tap Go when ready.' : `${matches.length} distinct matches. Pick one, then Go.`;
   matches.forEach((location) => els.results.append(createResultCard(location)));
+  if (reveal) revealResults();
 }
-
 function createResultCard(location) {
   const card = document.createElement('article');
   card.className = 'result-card pride-card';
@@ -203,69 +168,28 @@ function createResultCard(location) {
   const confidence = location.estimated ? `Estimated${location.confidence ? ` · ${location.confidence}` : ''}` : 'Known pin';
   const aliasNote = location.duplicateGroupName ? `Also listed as ${location.duplicateGroupName}. ` : '';
   const note = location.note || (resortMode ? `${aliasNote}${type} · ${confidence}` : `${aliasNote}${type} · ${confidence}. Consent, kindness, and camp rules, babe.`);
-
-  card.innerHTML = `
-    <div class="result-main">
-      <p class="result-kicker">${escapeHtml(type)}</p>
-      <h2 class="result-title">${escapeHtml(location.displayName)}</h2>
-      <p class="result-note">${escapeHtml(note)}</p>
-    </div>
-    <div class="result-actions">
-      <button class="copy-button" type="button">Copy</button>
-      <button class="go-button" type="button">Go</button>
-    </div>`;
-
+  card.innerHTML = `<div class="result-main"><p class="result-kicker">${escapeHtml(type)}</p><h2 class="result-title">${escapeHtml(location.displayName)}</h2><p class="result-note">${escapeHtml(note)}</p></div><div class="result-actions"><button class="copy-button" type="button">Copy</button><button class="go-button" type="button">Go</button></div>`;
   card.querySelector('.go-button').addEventListener('click', () => openInMaps(location));
   card.querySelector('.copy-button').addEventListener('click', () => copyLocation(location));
   return card;
 }
-
-function parseDate(value) {
-  const [year, month, day] = value.split('-').map(Number);
-  return new Date(year, month - 1, day);
-}
-
-function formatDateRange(start, end) {
-  const s = parseDate(start);
-  const e = parseDate(end);
-  e.setDate(e.getDate() - 1);
-  const opts = { month: 'short', day: 'numeric' };
-  return `${s.toLocaleDateString(undefined, opts)}–${e.toLocaleDateString(undefined, opts)}`;
-}
-
+function parseDate(value) { const [year, month, day] = value.split('-').map(Number); return new Date(year, month - 1, day); }
+function formatDateRange(start, end) { const s = parseDate(start); const e = parseDate(end); e.setDate(e.getDate() - 1); const opts = { month: 'short', day: 'numeric' }; return `${s.toLocaleDateString(undefined, opts)}–${e.toLocaleDateString(undefined, opts)}`; }
 function relevantEvents() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return EVENTS
-    .map((event) => ({ ...event, profile: eventProfileForTitle(event.title), startDate: parseDate(event.start), endDate: parseDate(event.end) }))
-    .filter((event) => event.endDate >= today)
-    .sort((a, b) => a.startDate - b.startDate)
-    .slice(0, 4);
+  return EVENTS.map((event) => ({ ...event, profile: eventProfileForTitle(event.title), startDate: parseDate(event.start), endDate: parseDate(event.end) })).filter((event) => event.endDate >= today).sort((a, b) => a.startDate - b.startDate).slice(0, 4);
 }
-
 function renderEvents() {
   if (!els.eventList) return;
   const events = relevantEvents();
   els.eventList.innerHTML = '';
-  if (!events.length) {
-    els.eventList.innerHTML = '<div class="event-card"><p class="event-note">No upcoming calendar blocks found yet.</p></div>';
-    return;
-  }
-
+  if (!events.length) { els.eventList.innerHTML = '<div class="event-card"><p class="event-note">No upcoming calendar blocks found yet.</p></div>'; return; }
   events.forEach((event, index) => {
     const card = document.createElement('article');
     card.className = `event-card ${event.profile.type === 'campground-tour' ? 'is-tour' : ''}`;
     const title = index === 0 && event.startDate <= new Date() && event.endDate >= new Date() ? 'Happening now' : (index === 0 ? 'Next up' : 'Coming up');
-    card.innerHTML = `
-      <div class="event-meta">
-        <span>${escapeHtml(title)}</span>
-        <span>${escapeHtml(formatDateRange(event.start, event.end))}</span>
-      </div>
-      <h3>${escapeHtml(event.title.replace(/^Woods\s+/i, ''))}</h3>
-      <p class="event-badge">${escapeHtml(event.profile.badge)}</p>
-      <p class="event-note">${escapeHtml(event.profile.note)}</p>
-      <div class="event-actions"></div>`;
-
+    card.innerHTML = `<div class="event-meta"><span>${escapeHtml(title)}</span><span>${escapeHtml(formatDateRange(event.start, event.end))}</span></div><h3>${escapeHtml(event.title.replace(/^Woods\s+/i, ''))}</h3><p class="event-badge">${escapeHtml(event.profile.badge)}</p><p class="event-note">${escapeHtml(event.profile.note)}</p><div class="event-actions"></div>`;
     const actions = card.querySelector('.event-actions');
     const primaryButton = document.createElement('button');
     primaryButton.type = 'button';
@@ -273,7 +197,6 @@ function renderEvents() {
     primaryButton.textContent = event.profile.type === 'campground-tour' ? 'Start tour' : 'Main spot';
     primaryButton.addEventListener('click', () => selectDestination(event.profile.primaryDestination));
     actions.append(primaryButton);
-
     event.profile.suggestedDestinations.forEach((name) => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -281,27 +204,17 @@ function renderEvents() {
       button.addEventListener('click', () => selectDestination(name));
       actions.append(button);
     });
-
     els.eventList.append(card);
   });
 }
-
 function selectDestination(name) {
   const destination = findDestinationByName(name);
   els.input.value = name;
-  if (destination) {
-    renderResults([destination], name);
-    destination.note && (els.summary.textContent = destination.note);
-  } else {
-    renderResults(searchLocations(name), name);
-  }
+  if (destination) { renderResults([destination], name, true); destination.note && (els.summary.textContent = destination.note); }
+  else { renderResults(searchLocations(name), name, true); }
   els.input.focus();
 }
-
-function latLng(location) {
-  return { lat: Number(location.lat).toFixed(7), lng: Number(location.lng).toFixed(7) };
-}
-
+function latLng(location) { return { lat: Number(location.lat).toFixed(7), lng: Number(location.lng).toFixed(7) }; }
 function openInMaps(location) {
   const { lat, lng } = latLng(location);
   const label = encodeURIComponent(location.displayName);
@@ -313,26 +226,9 @@ function openInMaps(location) {
   if (isIOS) { window.location.href = `https://maps.apple.com/?q=${label}&ll=${lat},${lng}`; return; }
   window.location.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 }
-
-async function copyLocation(location) {
-  const { lat, lng } = latLng(location);
-  const text = `${location.displayName}: ${lat}, ${lng}`;
-  try { await navigator.clipboard.writeText(text); toast('Pin copied.'); } catch { toast(text); }
-}
-
-function toast(message) {
-  let el = document.querySelector('.toast');
-  if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.append(el); }
-  el.textContent = message;
-  el.classList.add('is-visible');
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => el.classList.remove('is-visible'), 2200);
-}
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
-}
-
+async function copyLocation(location) { const { lat, lng } = latLng(location); const text = `${location.displayName}: ${lat}, ${lng}`; try { await navigator.clipboard.writeText(text); toast('Pin copied.'); } catch { toast(text); } }
+function toast(message) { let el = document.querySelector('.toast'); if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.append(el); } el.textContent = message; el.classList.add('is-visible'); clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove('is-visible'), 2200); }
+function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char])); }
 function distanceFeet(a, b) {
   const earthRadiusFeet = 20902231;
   const toRad = (degrees) => degrees * Math.PI / 180;
@@ -343,48 +239,40 @@ function distanceFeet(a, b) {
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
   return 2 * earthRadiusFeet * Math.asin(Math.sqrt(h));
 }
-
-function getCurrentPosition() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) { reject(new Error('Geolocation is not available in this browser.')); return; }
-    navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
-  });
-}
-
+function getCurrentPosition() { return new Promise((resolve, reject) => { if (!navigator.geolocation) { reject(new Error('Geolocation is not available in this browser.')); return; } navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }); }); }
 async function showClosestBathroom() {
   els.summary.textContent = 'Finding the closest bathroom…';
   els.results.innerHTML = '';
+  revealResults();
   try {
     const position = await getCurrentPosition();
     const here = { lat: position.coords.latitude, lng: position.coords.longitude };
     const nearest = bathhouses.map((bathhouse) => ({ ...bathhouse, distanceFeet: distanceFeet(here, bathhouse) })).sort((a, b) => a.distanceFeet - b.distanceFeet)[0];
     const location = { id: `nearest-bathhouse-${nearest.name.toLowerCase()}`, name: nearest.name, displayName: `Closest bathroom: ${nearest.name}`, lat: nearest.lat, lng: nearest.lng, category: 'bathhouse', sourceGeometry: 'Nearest bathhouse from updated KML', estimated: false, aliases: ['bathroom', 'restroom', 'bathhouse', 'shower', 'comfort station'], note: `About ${Math.round(nearest.distanceFeet)} feet away from your current location.` };
     els.input.value = 'Closest bathroom';
-    renderResults([location], location.displayName);
+    renderResults([location], location.displayName, true);
   } catch {
     els.summary.textContent = 'I need location permission to find the closest bathroom.';
     const empty = document.createElement('div');
     empty.className = 'empty';
     empty.textContent = 'Turn on location permission for this site, or search bathhouse, bathroom, restroom, shower, or comfort station and pick one manually.';
     els.results.append(empty);
+    revealResults();
   }
 }
-
-els.form.addEventListener('submit', (event) => { event.preventDefault(); renderResults(searchLocations(els.input.value), els.input.value); });
+els.form.addEventListener('submit', (event) => { event.preventDefault(); renderResults(searchLocations(els.input.value), els.input.value, true); });
 els.input.addEventListener('input', () => renderResults(searchLocations(els.input.value), els.input.value));
 els.clear.addEventListener('click', () => { els.input.value = ''; els.input.focus(); renderDefault(); });
-
 document.querySelectorAll('[data-query], [data-shortcut]').forEach((button) => {
   button.addEventListener('click', () => {
     if (button.dataset.shortcut === 'closestBathroom') { showClosestBathroom(); return; }
     const shortcut = button.dataset.shortcut ? shortcutDestinations[button.dataset.shortcut] : null;
-    if (shortcut) { els.input.value = shortcut.displayName; renderResults([shortcut], shortcut.displayName); els.input.focus(); return; }
+    if (shortcut) { els.input.value = shortcut.displayName; renderResults([shortcut], shortcut.displayName, true); toast(`${shortcut.displayName} selected`); els.input.focus(); return; }
     els.input.value = button.dataset.query;
-    renderResults(searchLocations(els.input.value), els.input.value);
+    renderResults(searchLocations(els.input.value), els.input.value, true);
     els.input.focus();
   });
 });
-
 els.paperMapButton.addEventListener('click', () => { els.paperOverlay.hidden = false; });
 els.paperCloseButton.addEventListener('click', () => { els.paperOverlay.hidden = true; });
 els.paperOverlay.addEventListener('click', (event) => { if (event.target === els.paperOverlay) els.paperOverlay.hidden = true; });
