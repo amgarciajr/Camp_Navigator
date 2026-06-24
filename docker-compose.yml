@@ -1,0 +1,9 @@
+services:
+  woods-after-dark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: woods-after-dark
+    restart: unless-stopped
+    ports:
+      - "8099:80"
