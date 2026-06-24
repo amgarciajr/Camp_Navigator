@@ -24,6 +24,21 @@ const categoryLabels = {
   parking: 'Parking',
 };
 
+const shortcutDestinations = {
+  groveParking: {
+    id: 'shortcut-grove-parking',
+    name: 'Grove Parking',
+    displayName: 'Grove Parking',
+    lat: 40.8975516,
+    lng: -75.6016636,
+    category: 'parking',
+    siteNumber: null,
+    sourceGeometry: 'Polygon centroid from updated KML',
+    estimated: false,
+    searchText: 'grove parking parking lot area',
+  },
+};
+
 let locations = buildLocations();
 let boringMode = readBoringMode();
 applyMode();
@@ -235,8 +250,17 @@ els.clear.addEventListener('click', () => {
   renderDefault();
 });
 
-document.querySelectorAll('[data-query]').forEach((button) => {
+document.querySelectorAll('[data-query], [data-shortcut]').forEach((button) => {
   button.addEventListener('click', () => {
+    const shortcut = button.dataset.shortcut ? shortcutDestinations[button.dataset.shortcut] : null;
+
+    if (shortcut) {
+      els.input.value = shortcut.displayName;
+      renderResults([shortcut], shortcut.displayName);
+      els.input.focus();
+      return;
+    }
+
     els.input.value = button.dataset.query;
     renderResults(searchLocations(els.input.value), els.input.value);
     els.input.focus();
@@ -259,7 +283,3 @@ els.discreetButton.addEventListener('click', () => {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') els.paperOverlay.hidden = true;
 });
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js').catch(() => {});
-}
