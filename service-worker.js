@@ -1,9 +1,11 @@
-const CACHE_NAME = 'woods-after-dark-v4';
+const CACHE_NAME = 'woods-after-dark-v5-quickfix';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
+  './styles.css?v=quickfix-1',
   './app.js',
+  './app.js?v=quickfix-1',
   './data.js',
   './events.js',
   './manifest.webmanifest',
