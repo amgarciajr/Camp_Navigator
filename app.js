@@ -36,14 +36,13 @@ const canonicalDestinationNames = {
 };
 
 const commonAliases = {
-  'Fort Dix': ['Ft. Dix', 'Ft Dix', 'Dix', 'cruising', 'cruising spot', 'known cruising area'],
+  'Fort Dix': ['Ft. Dix', 'Ft Dix', 'Dix', 'cruising', 'cruise', 'cruising spot', 'known cruising area'],
   'The Grove': ['Grove', 'Grove Camping Area', 'The Grove Camping Area', 'grove sites'],
   'The Afters at Triangle Field': ['The Afters', 'Afters', 'Triangle Field', 'after party', 'late night field'],
   'Back to the Cabin at 125': ['Cabin 125', 'Site 125', '125', 'home', 'home base', 'back to cabin'],
   'BodyShop / Massages': ['Massages', 'Massage', 'Body Shop', 'BodyShop', 'cuts', 'bodyscaping'],
   'Grove Parking': ['Grove lot', 'Grove parking lot', 'parking near grove'],
   'Pool': ['The Woods Pool', 'pool party', 'swimming pool'],
-  'Fort Dix': ['Ft. Dix', 'Ft Dix', 'Dix', 'cruising', 'cruise', 'cruising spot', 'known cruising area'],
   'The Pavilion': ['Pavilion', 'main pavilion'],
   'The Bonfire Pit': ['Bonfire', 'Fire Pit', 'bonfire pit'],
   'Fitness Center (Gym)': ['Gym', 'Fitness Center', 'workout'],
