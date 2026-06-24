@@ -1,6 +1,6 @@
 # The Woods After Dark — Camp Navigator
 
-A mobile-first, offline-friendly campground companion for **The Woods Camping Resort**. The app helps guests find campsites, bathhouses, named areas, social destinations, event-weekend touring spots, and a saved home base using fast native map handoff.
+A mobile-first, installable, offline-friendly PWA campground companion for **The Woods Camping Resort**. The app helps guests find campsites, bathhouses, named areas, social destinations, event-weekend touring spots, and a saved home base using fast native map handoff.
 
 ## Ownership
 
@@ -22,6 +22,22 @@ Core principles:
 - Keep shared paths and community spaces welcoming.
 - Use official/public event information and user-provided map data.
 - Do not scrape, infer, or expose private guest behavior.
+
+## PWA status
+
+This root app is now the canonical PWA build.
+
+Included PWA pieces:
+
+- `manifest.webmanifest` for Add to Home Screen / standalone display.
+- `service-worker.js` for offline app-shell caching.
+- Root service-worker registration in `index.html`.
+- Offline cache coverage for `index.html`, `styles.css`, `app.js`, `data.js`, `events.js`, manifest, icon, and map image.
+- Alpine Nginx container for Umbrel/Portainer deployment.
+- `docker-compose.yml` for one-click Portainer stack deployment.
+- `nginx.conf` with PWA-aware cache headers.
+
+For the best install experience on phones, serve the app over HTTPS. Local HTTP is fine for first testing on Umbrel/Portainer, but iOS/Android PWA behavior is most reliable on HTTPS.
 
 ## Current experience
 
@@ -66,15 +82,18 @@ confidence: "high" | "medium" | "low"
 
 ## Files
 
-- `index.html` — mobile app shell and event companion layout.
+- `index.html` — mobile app shell, PWA registration, and event companion layout.
 - `styles.css` — Pride-forward After Dark UI and Resort Mode styling.
 - `app.js` — search, aliases, shortcut routing, closest-bathroom logic, event-card rendering, and map handoff.
 - `events.js` — public calendar theme blocks and event-to-destination mapping rules.
 - `data.js` — generated campground destination and campsite data.
+- `service-worker.js` — offline cache and app-shell fetch handling.
 - `manifest.webmanifest` — PWA metadata.
+- `nginx.conf` — static Nginx config with PWA-friendly cache headers.
+- `docker-compose.yml` — Portainer/Umbrel stack definition.
 - `assets/woods-map.png` — paper/reference map image.
 - `assets/icon.svg` — app icon.
-- `Dockerfile` — nginx static hosting.
+- `Dockerfile` — Alpine Nginx static hosting.
 
 ## Run locally
 
@@ -92,18 +111,48 @@ http://localhost:8080
 
 ```bash
 docker build -t woods-after-dark .
-docker run --rm -p 8080:80 woods-after-dark
+docker run --rm -p 8099:80 woods-after-dark
 ```
 
 Open:
 
 ```text
-http://localhost:8080
+http://localhost:8099
 ```
 
-## Deploy on Umbrel
+## Deploy on Umbrel with Portainer
 
-Serve this as a static site with nginx or another lightweight web server container. No build step is required.
+1. Open Portainer on your Umbrel.
+2. Choose the local Docker environment.
+3. Go to **Stacks**.
+4. Click **Add stack**.
+5. Name the stack `woods-after-dark`.
+6. Choose **Repository**.
+7. Paste this GitHub repository URL.
+8. Set the compose path to `docker-compose.yml`.
+9. Deploy the stack.
+10. Open the app at:
+
+```text
+http://umbrel.local:8099
+```
+
+or:
+
+```text
+http://YOUR-UMBREL-IP:8099
+```
+
+To update the app later, pull the latest GitHub changes and redeploy/recreate the stack in Portainer.
+
+## Install on phone
+
+After opening the app in a mobile browser:
+
+- iPhone/Safari: Share button → **Add to Home Screen**.
+- Android/Chrome: menu button → **Install app** or **Add to Home screen**.
+
+Open it once while online so the service worker can cache the app shell and data.
 
 ## Privacy stance
 
