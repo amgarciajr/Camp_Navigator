@@ -1,4 +1,5 @@
 import { CAMPSITES, DESTINATIONS } from './data.js';
+import { EVENTS, eventProfileForTitle } from './events.js';
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -8,21 +9,15 @@ const els = {
   clear: $('#clearButton'),
   results: $('#results'),
   summary: $('#resultSummary'),
+  eventList: $('#eventList'),
   paperMapButton: $('#paperMapButton'),
   paperOverlay: $('#paperMapOverlay'),
   paperCloseButton: $('#paperCloseButton'),
   discreetButton: $('#discreetButton'),
 };
 
-const STORAGE_KEY = 'campnav:boring-mode:v2';
-const categoryLabels = {
-  campsite: 'Campsite',
-  bathhouse: 'Bathhouse',
-  poi: 'POI',
-  area: 'Area',
-  'road-path': 'Road / path',
-  parking: 'Parking',
-};
+const STORAGE_KEY = 'campnav:resort-mode:v3';
+const categoryLabels = { campsite: 'Campsite', bathhouse: 'Bathhouse', poi: 'POI', area: 'Area', 'road-path': 'Road / path', parking: 'Parking' };
 
 const canonicalDestinationNames = {
   'ft. dix': 'Fort Dix',
@@ -55,59 +50,10 @@ const commonAliases = {
 };
 
 const shortcutDestinations = {
-  fortDix: {
-    id: 'shortcut-fort-dix',
-    name: 'Fort Dix',
-    displayName: 'Fort Dix',
-    aliases: commonAliases['Fort Dix'],
-    lat: 40.895742,
-    lng: -75.604859,
-    category: 'poi',
-    siteNumber: null,
-    sourceGeometry: 'Point from updated KML',
-    estimated: false,
-    searchText: 'fort dix ft dix cruising cruise known cruising area',
-    note: 'Known advertised cruising area. Consent only, respect privacy, and follow resort rules.',
-  },
-  theGrove: {
-    id: 'shortcut-the-grove',
-    name: 'The Grove',
-    displayName: 'The Grove',
-    aliases: commonAliases['The Grove'],
-    lat: 40.8970775,
-    lng: -75.6027170,
-    category: 'area',
-    siteNumber: null,
-    sourceGeometry: 'The Grove Camping Area polygon centroid from updated KML',
-    estimated: false,
-    searchText: 'the grove grove camping area grove sites',
-  },
-  theAfters: {
-    id: 'shortcut-the-afters',
-    name: 'The Afters at Triangle Field',
-    displayName: 'The Afters at Triangle Field',
-    aliases: commonAliases['The Afters at Triangle Field'],
-    lat: 40.8992354,
-    lng: -75.5984093,
-    category: 'poi',
-    siteNumber: null,
-    sourceGeometry: 'Triangle Field point from updated KML',
-    estimated: false,
-    searchText: 'afters the afters triangle field after party late night field',
-  },
-  cabin125: {
-    id: 'shortcut-cabin-125',
-    name: 'Back to the Cabin at 125',
-    displayName: 'Back to the Cabin at 125',
-    aliases: commonAliases['Back to the Cabin at 125'],
-    lat: 40.8980997,
-    lng: -75.6060225,
-    category: 'campsite',
-    siteNumber: '125',
-    sourceGeometry: 'Site 125 point from updated KML',
-    estimated: false,
-    searchText: 'cabin 125 site 125 back to cabin home home base',
-  },
+  fortDix: { id: 'shortcut-fort-dix', name: 'Fort Dix', displayName: 'Fort Dix', aliases: commonAliases['Fort Dix'], lat: 40.895742, lng: -75.604859, category: 'poi', siteNumber: null, sourceGeometry: 'Point from updated KML', estimated: false, searchText: 'fort dix ft dix cruising cruise known cruising area', note: 'Known advertised cruising area. Consent only, respect privacy, and follow resort rules.' },
+  theGrove: { id: 'shortcut-the-grove', name: 'The Grove', displayName: 'The Grove', aliases: commonAliases['The Grove'], lat: 40.8970775, lng: -75.6027170, category: 'area', siteNumber: null, sourceGeometry: 'The Grove Camping Area polygon centroid from updated KML', estimated: false, searchText: 'the grove grove camping area grove sites' },
+  theAfters: { id: 'shortcut-the-afters', name: 'The Afters at Triangle Field', displayName: 'The Afters at Triangle Field', aliases: commonAliases['The Afters at Triangle Field'], lat: 40.8992354, lng: -75.5984093, category: 'poi', siteNumber: null, sourceGeometry: 'Triangle Field point from updated KML', estimated: false, searchText: 'afters the afters triangle field after party late night field' },
+  cabin125: { id: 'shortcut-cabin-125', name: 'Back to the Cabin at 125', displayName: 'Back to the Cabin at 125', aliases: commonAliases['Back to the Cabin at 125'], lat: 40.8980997, lng: -75.6060225, category: 'campsite', siteNumber: '125', sourceGeometry: 'Site 125 point from updated KML', estimated: false, searchText: 'cabin 125 site 125 back to cabin home home base' },
 };
 
 const bathhouses = [
@@ -120,40 +66,33 @@ const bathhouses = [
 ];
 
 let locations = buildLocations();
-let boringMode = readBoringMode();
+let resortMode = readResortMode();
 applyMode();
 renderDefault();
+renderEvents();
 
-function readBoringMode() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'false'); }
-  catch { return false; }
+function readResortMode() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'false'); } catch { return false; }
 }
 
-function writeBoringMode() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(boringMode));
-}
+function writeResortMode() { localStorage.setItem(STORAGE_KEY, JSON.stringify(resortMode)); }
 
 function applyMode() {
-  document.body.classList.toggle('is-boring', boringMode);
-  els.discreetButton.textContent = boringMode ? 'After Dark' : 'Boring mode';
-  els.discreetButton.setAttribute('aria-pressed', String(boringMode));
-  document.title = boringMode ? 'Campground Navigator' : 'The Woods After Dark';
+  document.body.classList.toggle('is-boring', resortMode);
+  els.discreetButton.textContent = resortMode ? 'After Dark' : 'Resort mode';
+  els.discreetButton.setAttribute('aria-pressed', String(resortMode));
+  document.title = resortMode ? 'Campground Navigator' : 'The Woods After Dark';
 }
 
 function normalize(value) {
-  return String(value ?? '').trim().toUpperCase().replace(/\s+/g, '')
-    .replace(/^([A-Z]+)0+(\d)/, '$1$2')
-    .replace(/^0+(\d)/, '$1');
+  return String(value ?? '').trim().toUpperCase().replace(/\s+/g, '').replace(/^([A-Z]+)0+(\d)/, '$1$2').replace(/^0+(\d)/, '$1');
 }
 
 function normalizeName(value) {
   return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
 }
 
-function friendlyName(name) {
-  const normalized = normalizeName(name);
-  return canonicalDestinationNames[normalized] || name;
-}
+function friendlyName(name) { return canonicalDestinationNames[normalizeName(name)] || name; }
 
 function aliasesFor(displayName, rawName) {
   const aliases = new Set([...(commonAliases[displayName] || []), ...(commonAliases[rawName] || [])]);
@@ -163,61 +102,30 @@ function aliasesFor(displayName, rawName) {
 
 function makeDuplicateSafeNames(items) {
   const counts = new Map();
-  items.forEach((item) => {
-    counts.set(item.displayName, (counts.get(item.displayName) || 0) + 1);
-  });
-
+  items.forEach((item) => counts.set(item.displayName, (counts.get(item.displayName) || 0) + 1));
   const seen = new Map();
   return items.map((item) => {
     const total = counts.get(item.displayName) || 0;
     if (total <= 1 || item.category === 'campsite') return item;
-
     const next = (seen.get(item.displayName) || 0) + 1;
     seen.set(item.displayName, next);
-
-    return {
-      ...item,
-      displayName: `${item.displayName} ${next}`,
-      aliases: [...new Set([...(item.aliases || []), item.displayName])],
-      duplicateGroupName: item.displayName,
-    };
+    return { ...item, displayName: `${item.displayName} ${next}`, aliases: [...new Set([...(item.aliases || []), item.displayName])], duplicateGroupName: item.displayName };
   });
 }
 
 function buildSearchText(location) {
-  return [
-    location.displayName,
-    location.name,
-    location.siteNumber,
-    location.category,
-    categoryLabels[location.category],
-    ...(location.aliases || []),
-  ].filter(Boolean).join(' ').toLowerCase();
+  return [location.displayName, location.name, location.siteNumber, location.category, categoryLabels[location.category], ...(location.aliases || [])].filter(Boolean).join(' ').toLowerCase();
 }
 
 function buildLocations() {
   const destinationItems = DESTINATIONS.map((destination, index) => {
     const displayName = friendlyName(destination.name);
-    return {
-      ...destination,
-      id: `poi-${index}`,
-      category: destination.category || 'poi',
-      siteNumber: null,
-      displayName,
-      aliases: aliasesFor(displayName, destination.name),
-    };
+    return { ...destination, id: `poi-${index}`, category: destination.category || 'poi', siteNumber: null, displayName, aliases: aliasesFor(displayName, destination.name) };
   });
 
   const campsiteItems = Object.entries(CAMPSITES).map(([siteNumber, site]) => {
     const displayName = siteNumber === '125' ? 'Back to the Cabin at 125' : (site.name || `Site ${siteNumber}`);
-    return {
-      ...site,
-      id: `site-${siteNumber}`,
-      category: 'campsite',
-      siteNumber,
-      displayName,
-      aliases: siteNumber === '125' ? commonAliases['Back to the Cabin at 125'] : [`Site ${siteNumber}`, siteNumber],
-    };
+    return { ...site, id: `site-${siteNumber}`, category: 'campsite', siteNumber, displayName, aliases: siteNumber === '125' ? commonAliases['Back to the Cabin at 125'] : [`Site ${siteNumber}`, siteNumber] };
   });
 
   return makeDuplicateSafeNames([...campsiteItems, ...destinationItems])
@@ -238,25 +146,19 @@ function dedupeMatches(matches) {
 function searchLocations(query) {
   const raw = String(query || '').trim();
   if (!raw) return [];
-
   const normalized = normalize(raw);
   const lower = raw.toLowerCase();
+  const normalizedRaw = normalizeName(raw);
 
-  const exactSite = locations.find((location) =>
-    location.category === 'campsite' && String(location.siteNumber ?? '').toUpperCase() === normalized
-  );
-
+  const exactSite = locations.find((location) => location.category === 'campsite' && String(location.siteNumber ?? '').toUpperCase() === normalized);
   const exactNameOrAlias = locations.find((location) => {
     if (location.id === exactSite?.id) return false;
-    const names = [location.displayName, location.name, ...(location.aliases || [])].map(normalizeName);
-    return names.includes(normalizeName(raw));
+    return [location.displayName, location.name, ...(location.aliases || [])].map(normalizeName).includes(normalizedRaw);
   });
 
   const starts = locations.filter((location) => {
     if (location.id === exactSite?.id || location.id === exactNameOrAlias?.id) return false;
-    return [location.displayName, location.name, ...(location.aliases || [])]
-      .filter(Boolean)
-      .some((value) => value.toLowerCase().startsWith(lower)) || String(location.siteNumber ?? '').toLowerCase().startsWith(lower);
+    return [location.displayName, location.name, ...(location.aliases || [])].filter(Boolean).some((value) => value.toLowerCase().startsWith(lower)) || String(location.siteNumber ?? '').toLowerCase().startsWith(lower);
   });
 
   const contains = locations.filter((location) => {
@@ -268,6 +170,12 @@ function searchLocations(query) {
   return dedupeMatches([exactSite, exactNameOrAlias, ...starts, ...contains].filter(Boolean)).slice(0, 8);
 }
 
+function findDestinationByName(name) {
+  const fromShortcut = Object.values(shortcutDestinations).find((location) => normalizeName(location.displayName) === normalizeName(name) || (location.aliases || []).map(normalizeName).includes(normalizeName(name)));
+  if (fromShortcut) return fromShortcut;
+  return searchLocations(name)[0] || null;
+}
+
 function renderDefault() {
   els.results.innerHTML = '';
   els.summary.textContent = 'Start with a site number, destination name, or alias.';
@@ -275,35 +183,26 @@ function renderDefault() {
 
 function renderResults(matches, query) {
   els.results.innerHTML = '';
-
-  if (!query.trim()) {
-    renderDefault();
-    return;
-  }
-
+  if (!query.trim()) { renderDefault(); return; }
   if (!matches.length) {
     els.summary.textContent = `No match for “${query.trim()}”.`;
     const empty = document.createElement('div');
     empty.className = 'empty';
-    empty.textContent = 'Try a site number like 125, an alias like Ft. Dix, The Afters, Grove, BodyShop, bathroom, or pool.';
+    empty.textContent = 'Try 125, Ft. Dix, The Afters, Grove, BodyShop, bathroom, comfort station, pool, or Pavilion.';
     els.results.append(empty);
     return;
   }
-
   els.summary.textContent = matches.length === 1 ? 'One match. Tap Go when ready.' : `${matches.length} distinct matches. Pick one, then Go.`;
   matches.forEach((location) => els.results.append(createResultCard(location)));
 }
 
 function createResultCard(location) {
   const card = document.createElement('article');
-  card.className = 'result-card';
-
+  card.className = 'result-card pride-card';
   const type = categoryLabels[location.category] || location.category;
   const confidence = location.estimated ? `Estimated${location.confidence ? ` · ${location.confidence}` : ''}` : 'Known pin';
   const aliasNote = location.duplicateGroupName ? `Also listed as ${location.duplicateGroupName}. ` : '';
-  const note = location.note || (boringMode
-    ? `${aliasNote}${type} · ${confidence}`
-    : `${aliasNote}${type} · ${confidence}. Consent, kindness, and camp rules, babe.`);
+  const note = location.note || (resortMode ? `${aliasNote}${type} · ${confidence}` : `${aliasNote}${type} · ${confidence}. Consent, kindness, and camp rules, babe.`);
 
   card.innerHTML = `
     <div class="result-main">
@@ -314,18 +213,93 @@ function createResultCard(location) {
     <div class="result-actions">
       <button class="copy-button" type="button">Copy</button>
       <button class="go-button" type="button">Go</button>
-    </div>
-  `;
+    </div>`;
 
   card.querySelector('.go-button').addEventListener('click', () => openInMaps(location));
   card.querySelector('.copy-button').addEventListener('click', () => copyLocation(location));
   return card;
 }
 
+function parseDate(value) {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatDateRange(start, end) {
+  const s = parseDate(start);
+  const e = parseDate(end);
+  e.setDate(e.getDate() - 1);
+  const opts = { month: 'short', day: 'numeric' };
+  return `${s.toLocaleDateString(undefined, opts)}–${e.toLocaleDateString(undefined, opts)}`;
+}
+
+function relevantEvents() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return EVENTS
+    .map((event) => ({ ...event, profile: eventProfileForTitle(event.title), startDate: parseDate(event.start), endDate: parseDate(event.end) }))
+    .filter((event) => event.endDate >= today)
+    .sort((a, b) => a.startDate - b.startDate)
+    .slice(0, 4);
+}
+
+function renderEvents() {
+  if (!els.eventList) return;
+  const events = relevantEvents();
+  els.eventList.innerHTML = '';
+  if (!events.length) {
+    els.eventList.innerHTML = '<div class="event-card"><p class="event-note">No upcoming calendar blocks found yet.</p></div>';
+    return;
+  }
+
+  events.forEach((event, index) => {
+    const card = document.createElement('article');
+    card.className = `event-card ${event.profile.type === 'campground-tour' ? 'is-tour' : ''}`;
+    const title = index === 0 && event.startDate <= new Date() && event.endDate >= new Date() ? 'Happening now' : (index === 0 ? 'Next up' : 'Coming up');
+    card.innerHTML = `
+      <div class="event-meta">
+        <span>${escapeHtml(title)}</span>
+        <span>${escapeHtml(formatDateRange(event.start, event.end))}</span>
+      </div>
+      <h3>${escapeHtml(event.title.replace(/^Woods\s+/i, ''))}</h3>
+      <p class="event-badge">${escapeHtml(event.profile.badge)}</p>
+      <p class="event-note">${escapeHtml(event.profile.note)}</p>
+      <div class="event-actions"></div>`;
+
+    const actions = card.querySelector('.event-actions');
+    const primaryButton = document.createElement('button');
+    primaryButton.type = 'button';
+    primaryButton.className = 'event-primary';
+    primaryButton.textContent = event.profile.type === 'campground-tour' ? 'Start tour' : 'Main spot';
+    primaryButton.addEventListener('click', () => selectDestination(event.profile.primaryDestination));
+    actions.append(primaryButton);
+
+    event.profile.suggestedDestinations.forEach((name) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = name.replace('The Afters at Triangle Field', 'The Afters').replace('Back to the Cabin at 125', 'Cabin 125');
+      button.addEventListener('click', () => selectDestination(name));
+      actions.append(button);
+    });
+
+    els.eventList.append(card);
+  });
+}
+
+function selectDestination(name) {
+  const destination = findDestinationByName(name);
+  els.input.value = name;
+  if (destination) {
+    renderResults([destination], name);
+    destination.note && (els.summary.textContent = destination.note);
+  } else {
+    renderResults(searchLocations(name), name);
+  }
+  els.input.focus();
+}
+
 function latLng(location) {
-  const lat = Number(location.lat).toFixed(7);
-  const lng = Number(location.lng).toFixed(7);
-  return { lat, lng };
+  return { lat: Number(location.lat).toFixed(7), lng: Number(location.lng).toFixed(7) };
 }
 
 function openInMaps(location) {
@@ -334,40 +308,21 @@ function openInMaps(location) {
   const ua = navigator.userAgent || '';
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isAndroid = /Android/.test(ua);
-
   toast(`Opening ${location.displayName}…`);
-
-  if (isAndroid) {
-    window.location.href = `geo:0,0?q=${lat},${lng}(${label})`;
-    return;
-  }
-
-  if (isIOS) {
-    window.location.href = `https://maps.apple.com/?q=${label}&ll=${lat},${lng}`;
-    return;
-  }
-
+  if (isAndroid) { window.location.href = `geo:0,0?q=${lat},${lng}(${label})`; return; }
+  if (isIOS) { window.location.href = `https://maps.apple.com/?q=${label}&ll=${lat},${lng}`; return; }
   window.location.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 }
 
 async function copyLocation(location) {
   const { lat, lng } = latLng(location);
   const text = `${location.displayName}: ${lat}, ${lng}`;
-  try {
-    await navigator.clipboard.writeText(text);
-    toast('Pin copied.');
-  } catch {
-    toast(text);
-  }
+  try { await navigator.clipboard.writeText(text); toast('Pin copied.'); } catch { toast(text); }
 }
 
 function toast(message) {
   let el = document.querySelector('.toast');
-  if (!el) {
-    el = document.createElement('div');
-    el.className = 'toast';
-    document.body.append(el);
-  }
+  if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.append(el); }
   el.textContent = message;
   el.classList.add('is-visible');
   clearTimeout(toast.timer);
@@ -375,13 +330,7 @@ function toast(message) {
 }
 
 function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (char) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  }[char]));
+  return String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
 }
 
 function distanceFeet(a, b) {
@@ -397,47 +346,19 @@ function distanceFeet(a, b) {
 
 function getCurrentPosition() {
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not available in this browser.'));
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 30000,
-    });
+    if (!navigator.geolocation) { reject(new Error('Geolocation is not available in this browser.')); return; }
+    navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
   });
 }
 
 async function showClosestBathroom() {
   els.summary.textContent = 'Finding the closest bathroom…';
   els.results.innerHTML = '';
-
   try {
     const position = await getCurrentPosition();
-    const here = {
-      lat: position.coords.latitude,
-      lng: position.coords.longitude,
-    };
-
-    const nearest = bathhouses
-      .map((bathhouse) => ({ ...bathhouse, distanceFeet: distanceFeet(here, bathhouse) }))
-      .sort((a, b) => a.distanceFeet - b.distanceFeet)[0];
-
-    const location = {
-      id: `nearest-bathhouse-${nearest.name.toLowerCase()}`,
-      name: nearest.name,
-      displayName: `Closest bathroom: ${nearest.name}`,
-      lat: nearest.lat,
-      lng: nearest.lng,
-      category: 'bathhouse',
-      sourceGeometry: 'Nearest bathhouse from updated KML',
-      estimated: false,
-      aliases: ['bathroom', 'restroom', 'bathhouse', 'shower', 'comfort station'],
-      note: `About ${Math.round(nearest.distanceFeet)} feet away from your current location.`,
-    };
-
+    const here = { lat: position.coords.latitude, lng: position.coords.longitude };
+    const nearest = bathhouses.map((bathhouse) => ({ ...bathhouse, distanceFeet: distanceFeet(here, bathhouse) })).sort((a, b) => a.distanceFeet - b.distanceFeet)[0];
+    const location = { id: `nearest-bathhouse-${nearest.name.toLowerCase()}`, name: nearest.name, displayName: `Closest bathroom: ${nearest.name}`, lat: nearest.lat, lng: nearest.lng, category: 'bathhouse', sourceGeometry: 'Nearest bathhouse from updated KML', estimated: false, aliases: ['bathroom', 'restroom', 'bathhouse', 'shower', 'comfort station'], note: `About ${Math.round(nearest.distanceFeet)} feet away from your current location.` };
     els.input.value = 'Closest bathroom';
     renderResults([location], location.displayName);
   } catch {
@@ -449,37 +370,15 @@ async function showClosestBathroom() {
   }
 }
 
-els.form.addEventListener('submit', (event) => {
-  event.preventDefault();
-  renderResults(searchLocations(els.input.value), els.input.value);
-});
-
-els.input.addEventListener('input', () => {
-  renderResults(searchLocations(els.input.value), els.input.value);
-});
-
-els.clear.addEventListener('click', () => {
-  els.input.value = '';
-  els.input.focus();
-  renderDefault();
-});
+els.form.addEventListener('submit', (event) => { event.preventDefault(); renderResults(searchLocations(els.input.value), els.input.value); });
+els.input.addEventListener('input', () => renderResults(searchLocations(els.input.value), els.input.value));
+els.clear.addEventListener('click', () => { els.input.value = ''; els.input.focus(); renderDefault(); });
 
 document.querySelectorAll('[data-query], [data-shortcut]').forEach((button) => {
   button.addEventListener('click', () => {
-    if (button.dataset.shortcut === 'closestBathroom') {
-      showClosestBathroom();
-      return;
-    }
-
+    if (button.dataset.shortcut === 'closestBathroom') { showClosestBathroom(); return; }
     const shortcut = button.dataset.shortcut ? shortcutDestinations[button.dataset.shortcut] : null;
-
-    if (shortcut) {
-      els.input.value = shortcut.displayName;
-      renderResults([shortcut], shortcut.displayName);
-      els.input.focus();
-      return;
-    }
-
+    if (shortcut) { els.input.value = shortcut.displayName; renderResults([shortcut], shortcut.displayName); els.input.focus(); return; }
     els.input.value = button.dataset.query;
     renderResults(searchLocations(els.input.value), els.input.value);
     els.input.focus();
@@ -488,17 +387,6 @@ document.querySelectorAll('[data-query], [data-shortcut]').forEach((button) => {
 
 els.paperMapButton.addEventListener('click', () => { els.paperOverlay.hidden = false; });
 els.paperCloseButton.addEventListener('click', () => { els.paperOverlay.hidden = true; });
-els.paperOverlay.addEventListener('click', (event) => {
-  if (event.target === els.paperOverlay) els.paperOverlay.hidden = true;
-});
-
-els.discreetButton.addEventListener('click', () => {
-  boringMode = !boringMode;
-  writeBoringMode();
-  applyMode();
-  renderResults(searchLocations(els.input.value), els.input.value);
-});
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') els.paperOverlay.hidden = true;
-});
+els.paperOverlay.addEventListener('click', (event) => { if (event.target === els.paperOverlay) els.paperOverlay.hidden = true; });
+els.discreetButton.addEventListener('click', () => { resortMode = !resortMode; writeResortMode(); applyMode(); renderResults(searchLocations(els.input.value), els.input.value); renderEvents(); });
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape') els.paperOverlay.hidden = true; });
