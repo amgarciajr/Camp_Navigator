@@ -24,54 +24,90 @@ const categoryLabels = {
   parking: 'Parking',
 };
 
+const canonicalDestinationNames = {
+  'ft. dix': 'Fort Dix',
+  'ft dix': 'Fort Dix',
+  'the grove camping area': 'The Grove',
+  'triangle field': 'The Afters at Triangle Field',
+  'massages': 'BodyShop / Massages',
+  'grove parking': 'Grove Parking',
+  'office parking area': 'Office Parking',
+  'the woods pool': 'Pool',
+};
+
+const commonAliases = {
+  'Fort Dix': ['Ft. Dix', 'Ft Dix', 'Dix', 'cruising', 'cruising spot', 'known cruising area'],
+  'The Grove': ['Grove', 'Grove Camping Area', 'The Grove Camping Area', 'grove sites'],
+  'The Afters at Triangle Field': ['The Afters', 'Afters', 'Triangle Field', 'after party', 'late night field'],
+  'Back to the Cabin at 125': ['Cabin 125', 'Site 125', '125', 'home', 'home base', 'back to cabin'],
+  'BodyShop / Massages': ['Massages', 'Massage', 'Body Shop', 'BodyShop', 'cuts', 'bodyscaping'],
+  'Grove Parking': ['Grove lot', 'Grove parking lot', 'parking near grove'],
+  'Pool': ['The Woods Pool', 'pool party', 'swimming pool'],
+  'Fort Dix': ['Ft. Dix', 'Ft Dix', 'Dix', 'cruising', 'cruise', 'cruising spot', 'known cruising area'],
+  'The Pavilion': ['Pavilion', 'main pavilion'],
+  'The Bonfire Pit': ['Bonfire', 'Fire Pit', 'bonfire pit'],
+  'Fitness Center (Gym)': ['Gym', 'Fitness Center', 'workout'],
+  'Coco': ['Coco bathhouse', 'bathroom', 'restroom', 'shower', 'comfort station'],
+  'Sophia': ['Sophia bathhouse', 'bathroom', 'restroom', 'shower', 'comfort station'],
+  'Rose': ['Rose bathhouse', 'bathroom', 'restroom', 'shower', 'comfort station'],
+  'Dorothy': ['Dorothy bathhouse', 'bathroom', 'restroom', 'shower', 'comfort station'],
+  'Blanch': ['Blanche', 'Blanch bathhouse', 'bathroom', 'restroom', 'shower', 'comfort station'],
+  'Stanley': ['Stanley bathhouse', 'bathroom', 'restroom', 'shower', 'comfort station'],
+};
+
 const shortcutDestinations = {
   fortDix: {
     id: 'shortcut-fort-dix',
     name: 'Fort Dix',
     displayName: 'Fort Dix',
+    aliases: commonAliases['Fort Dix'],
     lat: 40.895742,
     lng: -75.604859,
     category: 'poi',
     siteNumber: null,
     sourceGeometry: 'Point from updated KML',
     estimated: false,
-    searchText: 'fort dix ft dix',
+    searchText: 'fort dix ft dix cruising cruise known cruising area',
+    note: 'Known advertised cruising area. Consent only, respect privacy, and follow resort rules.',
   },
   theGrove: {
     id: 'shortcut-the-grove',
     name: 'The Grove',
     displayName: 'The Grove',
-    lat: 40.8971525,
-    lng: -75.6026547,
+    aliases: commonAliases['The Grove'],
+    lat: 40.8970775,
+    lng: -75.6027170,
     category: 'area',
     siteNumber: null,
     sourceGeometry: 'The Grove Camping Area polygon centroid from updated KML',
     estimated: false,
-    searchText: 'the grove grove camping area',
+    searchText: 'the grove grove camping area grove sites',
   },
   theAfters: {
     id: 'shortcut-the-afters',
-    name: 'The Afters in Triangle Field',
-    displayName: 'The Afters in Triangle Field',
+    name: 'The Afters at Triangle Field',
+    displayName: 'The Afters at Triangle Field',
+    aliases: commonAliases['The Afters at Triangle Field'],
     lat: 40.8992354,
     lng: -75.5984093,
     category: 'poi',
     siteNumber: null,
     sourceGeometry: 'Triangle Field point from updated KML',
     estimated: false,
-    searchText: 'afters afters triangle field',
+    searchText: 'afters the afters triangle field after party late night field',
   },
   cabin125: {
     id: 'shortcut-cabin-125',
     name: 'Back to the Cabin at 125',
     displayName: 'Back to the Cabin at 125',
+    aliases: commonAliases['Back to the Cabin at 125'],
     lat: 40.8980997,
     lng: -75.6060225,
     category: 'campsite',
     siteNumber: '125',
     sourceGeometry: 'Site 125 point from updated KML',
     estimated: false,
-    searchText: 'cabin 125 site 125 back to cabin',
+    searchText: 'cabin 125 site 125 back to cabin home home base',
   },
 };
 
@@ -111,33 +147,93 @@ function normalize(value) {
     .replace(/^0+(\d)/, '$1');
 }
 
+function normalizeName(value) {
+  return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+}
+
+function friendlyName(name) {
+  const normalized = normalizeName(name);
+  return canonicalDestinationNames[normalized] || name;
+}
+
+function aliasesFor(displayName, rawName) {
+  const aliases = new Set([...(commonAliases[displayName] || []), ...(commonAliases[rawName] || [])]);
+  if (displayName !== rawName) aliases.add(rawName);
+  return [...aliases];
+}
+
+function makeDuplicateSafeNames(items) {
+  const counts = new Map();
+  items.forEach((item) => {
+    counts.set(item.displayName, (counts.get(item.displayName) || 0) + 1);
+  });
+
+  const seen = new Map();
+  return items.map((item) => {
+    const total = counts.get(item.displayName) || 0;
+    if (total <= 1 || item.category === 'campsite') return item;
+
+    const next = (seen.get(item.displayName) || 0) + 1;
+    seen.set(item.displayName, next);
+
+    return {
+      ...item,
+      displayName: `${item.displayName} ${next}`,
+      aliases: [...new Set([...(item.aliases || []), item.displayName])],
+      duplicateGroupName: item.displayName,
+    };
+  });
+}
+
+function buildSearchText(location) {
+  return [
+    location.displayName,
+    location.name,
+    location.siteNumber,
+    location.category,
+    categoryLabels[location.category],
+    ...(location.aliases || []),
+  ].filter(Boolean).join(' ').toLowerCase();
+}
+
 function buildLocations() {
-  const destinationItems = DESTINATIONS.map((destination, index) => ({
-    ...destination,
-    id: `poi-${index}`,
-    category: destination.category || 'poi',
-    siteNumber: null,
-    displayName: destination.name,
-  }));
+  const destinationItems = DESTINATIONS.map((destination, index) => {
+    const displayName = friendlyName(destination.name);
+    return {
+      ...destination,
+      id: `poi-${index}`,
+      category: destination.category || 'poi',
+      siteNumber: null,
+      displayName,
+      aliases: aliasesFor(displayName, destination.name),
+    };
+  });
 
-  const campsiteItems = Object.entries(CAMPSITES).map(([siteNumber, site]) => ({
-    ...site,
-    id: `site-${siteNumber}`,
-    category: 'campsite',
-    siteNumber,
-    displayName: site.name || `Site ${siteNumber}`,
-  }));
+  const campsiteItems = Object.entries(CAMPSITES).map(([siteNumber, site]) => {
+    const displayName = siteNumber === '125' ? 'Back to the Cabin at 125' : (site.name || `Site ${siteNumber}`);
+    return {
+      ...site,
+      id: `site-${siteNumber}`,
+      category: 'campsite',
+      siteNumber,
+      displayName,
+      aliases: siteNumber === '125' ? commonAliases['Back to the Cabin at 125'] : [`Site ${siteNumber}`, siteNumber],
+    };
+  });
 
-  return [...campsiteItems, ...destinationItems].map((location) => ({
-    ...location,
-    searchText: [
-      location.displayName,
-      location.name,
-      location.siteNumber,
-      location.category,
-      categoryLabels[location.category],
-    ].filter(Boolean).join(' ').toLowerCase(),
-  })).sort((a, b) => a.displayName.localeCompare(b.displayName, undefined, { numeric: true }));
+  return makeDuplicateSafeNames([...campsiteItems, ...destinationItems])
+    .map((location) => ({ ...location, searchText: buildSearchText(location) }))
+    .sort((a, b) => a.displayName.localeCompare(b.displayName, undefined, { numeric: true }));
+}
+
+function dedupeMatches(matches) {
+  const seen = new Set();
+  return matches.filter((location) => {
+    const key = `${normalizeName(location.displayName)}|${Number(location.lat).toFixed(7)}|${Number(location.lng).toFixed(7)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function searchLocations(query) {
@@ -151,23 +247,31 @@ function searchLocations(query) {
     location.category === 'campsite' && String(location.siteNumber ?? '').toUpperCase() === normalized
   );
 
-  const starts = locations.filter((location) => {
+  const exactNameOrAlias = locations.find((location) => {
     if (location.id === exactSite?.id) return false;
-    return location.displayName.toLowerCase().startsWith(lower) || String(location.siteNumber ?? '').toLowerCase().startsWith(lower);
+    const names = [location.displayName, location.name, ...(location.aliases || [])].map(normalizeName);
+    return names.includes(normalizeName(raw));
+  });
+
+  const starts = locations.filter((location) => {
+    if (location.id === exactSite?.id || location.id === exactNameOrAlias?.id) return false;
+    return [location.displayName, location.name, ...(location.aliases || [])]
+      .filter(Boolean)
+      .some((value) => value.toLowerCase().startsWith(lower)) || String(location.siteNumber ?? '').toLowerCase().startsWith(lower);
   });
 
   const contains = locations.filter((location) => {
-    if (location.id === exactSite?.id) return false;
+    if (location.id === exactSite?.id || location.id === exactNameOrAlias?.id) return false;
     if (starts.some((item) => item.id === location.id)) return false;
     return location.searchText.includes(lower);
   });
 
-  return [exactSite, ...starts, ...contains].filter(Boolean).slice(0, 8);
+  return dedupeMatches([exactSite, exactNameOrAlias, ...starts, ...contains].filter(Boolean)).slice(0, 8);
 }
 
 function renderDefault() {
   els.results.innerHTML = '';
-  els.summary.textContent = 'Start with a site number or destination name.';
+  els.summary.textContent = 'Start with a site number, destination name, or alias.';
 }
 
 function renderResults(matches, query) {
@@ -182,12 +286,12 @@ function renderResults(matches, query) {
     els.summary.textContent = `No match for “${query.trim()}”.`;
     const empty = document.createElement('div');
     empty.className = 'empty';
-    empty.textContent = 'Try a site number like 36, G12, F26, or a place like bathhouse, parking, pool, or pavilion.';
+    empty.textContent = 'Try a site number like 125, an alias like Ft. Dix, The Afters, Grove, BodyShop, bathroom, or pool.';
     els.results.append(empty);
     return;
   }
 
-  els.summary.textContent = matches.length === 1 ? 'One match. Tap Go when ready.' : `${matches.length} matches. Pick one, then Go.`;
+  els.summary.textContent = matches.length === 1 ? 'One match. Tap Go when ready.' : `${matches.length} distinct matches. Pick one, then Go.`;
   matches.forEach((location) => els.results.append(createResultCard(location)));
 }
 
@@ -197,9 +301,10 @@ function createResultCard(location) {
 
   const type = categoryLabels[location.category] || location.category;
   const confidence = location.estimated ? `Estimated${location.confidence ? ` · ${location.confidence}` : ''}` : 'Known pin';
+  const aliasNote = location.duplicateGroupName ? `Also listed as ${location.duplicateGroupName}. ` : '';
   const note = location.note || (boringMode
-    ? `${type} · ${confidence}`
-    : `${type} · ${confidence}. Use it however the evening unfolds.`);
+    ? `${aliasNote}${type} · ${confidence}`
+    : `${aliasNote}${type} · ${confidence}. Consent, kindness, and camp rules, babe.`);
 
   card.innerHTML = `
     <div class="result-main">
@@ -330,6 +435,7 @@ async function showClosestBathroom() {
       category: 'bathhouse',
       sourceGeometry: 'Nearest bathhouse from updated KML',
       estimated: false,
+      aliases: ['bathroom', 'restroom', 'bathhouse', 'shower', 'comfort station'],
       note: `About ${Math.round(nearest.distanceFeet)} feet away from your current location.`,
     };
 
@@ -339,7 +445,7 @@ async function showClosestBathroom() {
     els.summary.textContent = 'I need location permission to find the closest bathroom.';
     const empty = document.createElement('div');
     empty.className = 'empty';
-    empty.textContent = 'Turn on location permission for this site, or search bathhouse and pick one manually.';
+    empty.textContent = 'Turn on location permission for this site, or search bathhouse, bathroom, restroom, shower, or comfort station and pick one manually.';
     els.results.append(empty);
   }
 }
