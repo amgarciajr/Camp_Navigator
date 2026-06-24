@@ -1,10 +1,11 @@
-const CACHE_NAME = 'camp-nav-find-v1';
+const CACHE_NAME = 'woods-after-dark-v4';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './data.js',
+  './events.js',
   './manifest.webmanifest',
   './assets/woods-map.png',
   './assets/icon.svg'
@@ -28,6 +29,7 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const requestUrl = new URL(event.request.url);
   const wantsHtml = event.request.mode === 'navigate' || requestUrl.pathname.endsWith('/index.html');
+
   if (wantsHtml) {
     event.respondWith(
       fetch(event.request)
@@ -40,6 +42,7 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
