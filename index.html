@@ -14,18 +14,18 @@
     <img class="map-backdrop" src="assets/woods-map.png" alt="The Woods campground map background" />
     <div class="backdrop-scrim" aria-hidden="true"></div>
 
-    <section class="find-card" aria-labelledby="appTitle">
+    <section class="find-card pride-frame" aria-labelledby="appTitle">
       <header class="hero">
         <p class="eyebrow">The Woods · After Dark</p>
-        <h1 id="appTitle">Where are we going?</h1>
-        <p class="hero-copy">Find a site, cabin, bathhouse, or POI. Tap <strong>Go</strong> and your maps app opens.</p>
+        <h1 id="appTitle">Where to, gorgeous?</h1>
+        <p class="hero-copy">A sex-positive, rule-respecting campground companion. Pick a spot, find a site, tour the sparkle, or get back to home base.</p>
       </header>
 
       <form id="findForm" class="find-form" autocomplete="off">
         <label class="sr-only" for="searchInput">Find a destination</label>
         <div class="search-row">
           <span aria-hidden="true">⌕</span>
-          <input id="searchInput" name="q" type="search" inputmode="search" placeholder="Site 36, G12, F26, bathhouse" autofocus />
+          <input id="searchInput" name="q" type="search" inputmode="search" placeholder="Ft. Dix, The Afters, bathroom, 125" autofocus />
           <button id="clearButton" type="button" aria-label="Clear search">×</button>
         </div>
         <button class="primary-go" type="submit">Find</button>
@@ -39,13 +39,25 @@
         <button type="button" data-shortcut="closestBathroom">Closest bathroom</button>
       </div>
 
-      <div id="resultSummary" class="summary" role="status" aria-live="polite">Start with a site number or destination name.</div>
+      <section class="event-panel" aria-labelledby="eventTitle">
+        <div class="event-panel-header">
+          <div>
+            <p class="eyebrow">Calendar-aware</p>
+            <h2 id="eventTitle">This Weekend</h2>
+          </div>
+          <span class="pride-pill">Pride mode</span>
+        </div>
+        <div id="eventList" class="event-list" aria-live="polite"></div>
+      </section>
+
+      <div class="respect-note">Consent only. Respect privacy, quiet hours, posted rules, and each other. Sparkle responsibly.</div>
+      <div id="resultSummary" class="summary" role="status" aria-live="polite">Start with a site number, destination name, or alias.</div>
       <div id="results" class="results" aria-label="Search results"></div>
     </section>
 
     <footer class="utility-bar" aria-label="Utility actions">
       <button id="paperMapButton" type="button">Paper map</button>
-      <button id="discreetButton" type="button" aria-pressed="false">Boring mode</button>
+      <button id="discreetButton" type="button" aria-pressed="false">Resort mode</button>
     </footer>
 
     <div id="paperMapOverlay" class="paper-overlay" hidden>
